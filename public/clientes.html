@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Cadastro de Cliente</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        body {
+            background: #f4f6f9;
+        }
+
+        .card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .header {
+            background: #2c3e50;
+            color: white;
+            padding: 15px;
+            border-radius: 10px 10px 0 0;
+        }
+    </style>
+
+</head>
+
+<body>
+    <nav class="navbar navbar-dark bg-dark">
+        <div class="container-fluid">
+
+            <span class="navbar-brand mb-0 h1">⚖ Sistema Jurídico</span>
+
+            <div class="d-flex align-items-center">
+
+                <span class="text-white me-3">
+                    Usuário: <strong id="usuarioLogado"></strong>
+                </span>
+
+                <button class="btn btn-light btn-sm me-2" onclick="voltar()">
+                    ← Voltar
+                </button>
+
+                <button class="btn btn-danger btn-sm" onclick="logout()">
+                    Sair
+                </button>
+
+            </div>
+
+        </div>
+    </nav>
+
+    <div class="container mt-5">
+
+        <div class="card">
+
+            <div class="header">
+                <h4>Cadastro de Cliente</h4>
+            </div>
+
+            <div class="card-body">
+
+                <form id="formCliente">
+
+                    <div class="row">
+
+                        <div class="col-md-6 mb-3">
+                            <label>Nome</label>
+                            <input type="text" class="form-control" id="nome" required>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label>CPF</label>
+                            <input type="text" class="form-control" id="cpf">
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label>Telefone</label>
+                            <input type="text" class="form-control" id="telefone">
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label>Email</label>
+                            <input type="email" class="form-control" id="email">
+                        </div>
+
+                        <div class="col-12 mb-3">
+                            <label>Endereço</label>
+                            <input type="text" class="form-control" id="endereco">
+                        </div>
+
+                    </div>
+
+                    <button class="btn btn-primary">
+                        Salvar Cliente
+                    </button>
+
+                </form>
+
+                <hr>
+
+                <h5>Clientes cadastrados</h5>
+
+                <table class="table table-striped">
+
+                    <thead>
+                        <tr>
+                            <th>Nome</th>
+                            <th>CPF</th>
+                            <th>Telefone</th>
+                            <th>Email</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="listaClientes"></tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <script>
+
+        const token = localStorage.getItem("token")
+
+        if (!token) {
+            window.location.href = "/login.html"
+        }
+
+        document.getElementById("formCliente")
+            .addEventListener("submit", async function (e) {
+
+                e.preventDefault()
+
+                const cliente = {
+                    nome: document.getElementById("nome").value,
+                    cpf: document.getElementById("cpf").value,
+                    telefone: document.getElementById("telefone").value,
+                    email: document.getElementById("email").value,
+                    endereco: document.getElementById("endereco").value
+                }
+
+                await fetch("/clientes", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": "Bearer " + token
+                    },
+                    body: JSON.stringify(cliente)
+                })
+
+                alert("Cliente cadastrado")
+
+                listarClientes()
+
+            })
+
+        async function listarClientes() {
+
+            const resposta = await fetch("/clientes", {
+                headers: {
+                    "Authorization": "Bearer " + token
+                }
+            })
+
+            const clientes = await resposta.json()
+
+            let html = ""
+
+            clientes.forEach(c => {
+
+                html += `
+<tr>
+<td>${c.nome}</td>
+<td>${c.cpf}</td>
+<td>${c.telefone}</td>
+<td>${c.email}</td>
+</tr>
+`
+
+            })
+
+            document.getElementById("listaClientes").innerHTML = html
+
+        }
+
+        listarClientes()
+
+        //mostrar uuario logado
+        if (!token) {
+            window.location.href = "/login.html"
+        }
+
+            // decodificar token
+        const payload = JSON.parse(atob(token.split('.')[1]))
+
+        document.getElementById("usuarioLogado").innerText = payload.nome
+        
+        //botão voltar
+        function voltar() {
+                window.location.href = "/admin.html"
+            }
+
+        //sair
+        function logout() {
+
+                localStorage.removeItem("token")
+
+                window.location.href = "/index.html"
+
+            }
+
+
+    </script>
+
+</body>
+
+</html>

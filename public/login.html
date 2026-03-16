@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+
+    <meta charset="UTF-8">
+    <title>Login • Sistema Jurídico</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        body {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #1f2f46, #2c3e50);
+            font-family: Segoe UI, Arial;
+        }
+
+        .login-card {
+            width: 380px;
+            border-radius: 12px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            background: white;
+        }
+
+        .logo {
+            font-size: 32px;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #777;
+            margin-bottom: 30px;
+        }
+
+        .form-control {
+            height: 45px;
+        }
+
+        .btn-login {
+            height: 45px;
+            font-weight: 600;
+            background: #2c3e50;
+            border: none;
+        }
+
+        .btn-login:hover {
+            background: #1f2f46;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 14px;
+            color: #888;
+        }
+    </style>
+
+</head>
+
+<body>
+
+    <div class="login-card">
+
+        <div class="logo">⚖</div>
+
+        <h4 class="text-center">Sistema Jurídico</h4>
+
+        <p class="subtitle">Acesso ao painel administrativo</p>
+
+        <div class="mb-3">
+
+            <label>Email</label>
+
+            <input type="email" class="form-control" id="email" placeholder="Digite seu email">
+
+        </div>
+
+        <div class="mb-3">
+
+            <label>Senha</label>
+
+            <input type="password" class="form-control" id="senha" placeholder="Digite sua senha">
+
+        </div>
+
+        <button class="btn btn-login btn-primary w-100" onclick="login()">
+            Entrar
+        </button>
+
+        <div class="text-danger text-center mt-3" id="msg"></div>
+
+        <div class="footer">
+            Sistema de Gestão Jurídica
+        </div>
+
+    </div>
+
+    <script>
+
+        async function login() {
+
+            const email = document.getElementById("email").value
+            const senha = document.getElementById("senha").value
+
+            const resposta = await fetch("/auth/login", {
+
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/json"
+                },
+
+                body: JSON.stringify({ email, senha })
+
+            })
+
+            const dados = await resposta.json()
+
+            if (dados.token) {
+
+                localStorage.setItem("token", dados.token)
+
+                window.location.href = "/admin.html"
+
+            } else {
+
+                document.getElementById("msg").innerText = dados.msg
+
+            }
+
+        }
+
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Processos</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        body {
+            background: #f4f6f9;
+        }
+
+        .card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .list-group-item {
+            cursor: pointer;
+        }
+    </style>
+
+</head>
+
+<body>
+
+    <!-- MENU SUPERIOR -->
+
+    <nav class="navbar navbar-dark bg-dark">
+        <div class="container-fluid">
+
+            <span class="navbar-brand">⚖ Sistema Jurídico</span>
+
+            <div>
+
+                <span class="text-white me-3">
+                    Usuário: <strong id="usuarioLogado"></strong>
+                </span>
+
+                <button class="btn btn-light btn-sm me-2" onclick="voltar()">Voltar</button>
+
+                <button class="btn btn-danger btn-sm" onclick="logout()">Sair</button>
+
+            </div>
+
+        </div>
+    </nav>
+
+    <!-- CONTEÚDO -->
+
+    <div class="container mt-4">
+
+        <div class="card">
+
+            <div class="card-header">
+                <h5>Cadastro de Processo</h5>
+            </div>
+
+            <div class="card-body">
+
+                <form id="formProcesso">
+
+                    <div class="row">
+
+                        <div class="col-md-6 mb-3">
+                            <label>Número do Processo</label>
+                            <input type="text" class="form-control" id="numero_processo" required>
+                        </div>
+
+                        <!-- BUSCAR CLIENTE -->
+
+                        <div class="col-md-6 mb-3">
+
+                            <label>Cliente</label>
+
+                            <input type="text" class="form-control" id="buscarCliente"
+                                placeholder="Digite o nome do cliente">
+
+                            <div id="resultadoClientes" class="list-group mt-2"></div>
+
+                            <input type="hidden" id="cliente_id">
+
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label>Tipo</label>
+                            <input type="text" class="form-control" id="tipo">
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label>Status</label>
+
+                            <select class="form-control" id="status">
+                                <option>Em andamento</option>
+                                <option>Concluído</option>
+                                <option>Arquivado</option>
+                            </select>
+
+                        </div>
+
+                        <div class="col-12 mb-3">
+                            <label>Descrição</label>
+                            <textarea class="form-control" id="descricao"></textarea>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label>Data de abertura</label>
+                            <input type="date" class="form-control" id="data_abertura">
+                        </div>
+
+                    </div>
+
+                    <button class="btn btn-primary">
+                        Salvar Processo
+                    </button>
+
+                </form>
+
+            </div>
+
+        </div>
+
+        <!-- LISTA DE PROCESSOS -->
+
+        <div class="card mt-4">
+
+            <div class="card-header">
+                <h5>Processos cadastrados</h5>
+            </div>
+
+            <div class="card-body">
+
+                <table class="table table-striped">
+
+                    <thead>
+                        <tr>
+                            <th>Número</th>
+                            <th>Cliente</th>
+                            <th>Tipo</th>
+                            <th>Status</th>
+                            <th>Data</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="listaProcessos"></tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <script>
+
+        const token = localStorage.getItem("token")
+
+        if (!token) {
+            window.location.href = "/login.html"
+        }
+
+        // mostrar usuário logado
+        const payload = JSON.parse(atob(token.split('.')[1]))
+        document.getElementById("usuarioLogado").innerText = payload.nome
+
+        // voltar
+        function voltar() {
+            window.location.href = "/admin.html"
+        }
+
+        // logout
+        function logout() {
+            localStorage.removeItem("token")
+            window.location.href = "/index.html"
+        }
+
+        //////////////////////////////////////////////////////////
+        // BUSCAR CLIENTE
+        //////////////////////////////////////////////////////////
+
+        document.getElementById("buscarCliente")
+            .addEventListener("keyup", async function () {
+
+                const termo = this.value
+
+                if (termo.length < 2) {
+                    document.getElementById("resultadoClientes").innerHTML = ""
+                    return
+                }
+
+                const resposta = await fetch("/clientes", {
+                    headers: {
+                        "Authorization": "Bearer " + token
+                    }
+                })
+
+                const clientes = await resposta.json()
+
+                let html = ""
+
+                clientes
+                    .filter(c => c.nome.toLowerCase().includes(termo.toLowerCase()))
+                    .forEach(c => {
+
+                        html += `
+<a class="list-group-item list-group-item-action"
+onclick="selecionarCliente(${c.id},'${c.nome}')">
+
+${c.nome}
+
+</a>
+`
+
+                    })
+
+                document.getElementById("resultadoClientes").innerHTML = html
+
+            })
+
+        function selecionarCliente(id, nome) {
+
+            document.getElementById("cliente_id").value = id
+            document.getElementById("buscarCliente").value = nome
+            document.getElementById("resultadoClientes").innerHTML = ""
+
+        }
+
+        //////////////////////////////////////////////////////////
+        // CADASTRAR PROCESSO
+        //////////////////////////////////////////////////////////
+
+        document.getElementById("formProcesso")
+            .addEventListener("submit", async function (e) {
+
+                e.preventDefault()
+
+                const processo = {
+
+                    numero_processo: document.getElementById("numero_processo").value,
+                    cliente_id: document.getElementById("cliente_id").value,
+                    tipo: document.getElementById("tipo").value,
+                    status: document.getElementById("status").value,
+                    descricao: document.getElementById("descricao").value,
+                    data_abertura: document.getElementById("data_abertura").value
+
+                }
+
+                await fetch("/processos", {
+
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": "Bearer " + token
+                    },
+                    body: JSON.stringify(processo)
+
+                })
+
+                alert("Processo cadastrado")
+
+                listarProcessos()
+
+            })
+
+        //////////////////////////////////////////////////////////
+        // LISTAR PROCESSOS
+        //////////////////////////////////////////////////////////
+
+        async function listarProcessos() {
+
+            const resposta = await fetch("/processos", {
+                headers: {
+                    "Authorization": "Bearer " + token
+                }
+            })
+
+            const processos = await resposta.json()
+
+            let html = ""
+
+            processos.forEach(p => {
+
+                html += `
+<tr>
+<td>${p.numero_processo}</td>
+<td>${p.cliente}</td>
+<td>${p.tipo}</td>
+<td>${p.status}</td>
+<td>${p.data_abertura}</td>
+</tr>
+`
+
+            })
+
+            document.getElementById("listaProcessos").innerHTML = html
+
+        }
+
+        listarProcessos()
+
+    </script>
+
+</body>
+
+</html>
