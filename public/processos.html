@@ -1,309 +1,941 @@
 <!DOCTYPE html>
-<html lang="pt-br">
-
+<html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <title>Processos</title>
-
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-
-    <style>
-        body {
-            background: #f4f6f9;
-        }
-
-        .card {
-            border: none;
-            border-radius: 10px;
-            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
-        }
-
-        .list-group-item {
-            cursor: pointer;
-        }
-    </style>
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Processos | Sistema Jurídico</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/app.css">
 </head>
-
 <body>
-
-    <!-- MENU SUPERIOR -->
-
-    <nav class="navbar navbar-dark bg-dark">
-        <div class="container-fluid">
-
-            <span class="navbar-brand">⚖ Sistema Jurídico</span>
-
-            <div>
-
-                <span class="text-white me-3">
-                    Usuário: <strong id="usuarioLogado"></strong>
-                </span>
-
-                <button class="btn btn-light btn-sm me-2" onclick="voltar()">Voltar</button>
-
-                <button class="btn btn-danger btn-sm" onclick="logout()">Sair</button>
-
-            </div>
-
-        </div>
-    </nav>
-
-    <!-- CONTEÚDO -->
-
-    <div class="container mt-4">
-
-        <div class="card">
-
-            <div class="card-header">
-                <h5>Cadastro de Processo</h5>
-            </div>
-
-            <div class="card-body">
-
-                <form id="formProcesso">
-
-                    <div class="row">
-
-                        <div class="col-md-6 mb-3">
-                            <label>Número do Processo</label>
-                            <input type="text" class="form-control" id="numero_processo" required>
-                        </div>
-
-                        <!-- BUSCAR CLIENTE -->
-
-                        <div class="col-md-6 mb-3">
-
-                            <label>Cliente</label>
-
-                            <input type="text" class="form-control" id="buscarCliente"
-                                placeholder="Digite o nome do cliente">
-
-                            <div id="resultadoClientes" class="list-group mt-2"></div>
-
-                            <input type="hidden" id="cliente_id">
-
-                        </div>
-
-                        <div class="col-md-6 mb-3">
-                            <label>Tipo</label>
-                            <input type="text" class="form-control" id="tipo">
-                        </div>
-
-                        <div class="col-md-6 mb-3">
-                            <label>Status</label>
-
-                            <select class="form-control" id="status">
-                                <option>Em andamento</option>
-                                <option>Concluído</option>
-                                <option>Arquivado</option>
-                            </select>
-
-                        </div>
-
-                        <div class="col-12 mb-3">
-                            <label>Descrição</label>
-                            <textarea class="form-control" id="descricao"></textarea>
-                        </div>
-
-                        <div class="col-md-6 mb-3">
-                            <label>Data de abertura</label>
-                            <input type="date" class="form-control" id="data_abertura">
-                        </div>
-
-                    </div>
-
-                    <button class="btn btn-primary">
-                        Salvar Processo
-                    </button>
-
-                </form>
-
-            </div>
-
-        </div>
-
-        <!-- LISTA DE PROCESSOS -->
-
-        <div class="card mt-4">
-
-            <div class="card-header">
-                <h5>Processos cadastrados</h5>
-            </div>
-
-            <div class="card-body">
-
-                <table class="table table-striped">
-
-                    <thead>
-                        <tr>
-                            <th>Número</th>
-                            <th>Cliente</th>
-                            <th>Tipo</th>
-                            <th>Status</th>
-                            <th>Data</th>
-                        </tr>
-                    </thead>
-
-                    <tbody id="listaProcessos"></tbody>
-
-                </table>
-
-            </div>
-
-        </div>
-
+  <nav class="navbar navbar-expand-lg app-navbar">
+    <div class="container py-2">
+      <a class="navbar-brand d-flex align-items-center gap-3" href="/escritorio.html">
+        <span class="brand-mark">⚖</span>
+        <span class="fw-semibold">Painel do Escritório</span>
+      </a>
+      <div class="ms-auto d-flex flex-wrap gap-2 align-items-center">
+        <span class="nav-pill">Empresa: <strong id="empresaNome">-</strong></span>
+        <span class="nav-pill">Usuário: <strong id="usuarioNome">-</strong></span>
+        <button class="btn btn-outline-dark btn-sm" onclick="window.location.href='/escritorio.html'">Voltar</button>
+        <button class="btn btn-outline-dark btn-sm" onclick="App.logout('/login.html')">Sair</button>
+      </div>
     </div>
+  </nav>
 
-    <script>
+  <main class="page-wrap container py-4 py-lg-5">
+    <section class="page-hero mb-4">
+      <div class="row g-4 align-items-center">
+        <div class="col-lg-8">
+          <span class="eyebrow">Gestão processual</span>
+          <h1 class="display-title mt-3 mb-3">Processos do escritório</h1>
+          <p class="lead-copy mb-0">
+            Use a lista para operar processos, aplicar filtros e abrir as ações de edição, andamento e exclusão.
+          </p>
+          <div class="mt-3">
+            <span class="badge-soft">Tenant: <strong id="tenantNome">-</strong></span>
+          </div>
+        </div>
+        <div class="col-lg-4">
+          <div class="glass-card p-3 p-md-4">
+            <div class="row g-3">
+              <div class="col-6">
+                <div class="metric-card h-100">
+                  <div class="metric-label">Processos</div>
+                  <div class="metric-value" id="qtdProcessos">0</div>
+                  <div class="metric-note">cadastrados</div>
+                </div>
+              </div>
+              <div class="col-6">
+                <div class="metric-card h-100">
+                  <div class="metric-label">Custos</div>
+                  <div class="metric-value" id="totalCustos">R$ 0,00</div>
+                  <div class="metric-note">totais</div>
+                </div>
+              </div>
+              <div class="col-12">
+                <div class="metric-card">
+                  <div class="metric-label">Honorários</div>
+                  <div class="metric-value" id="totalHonorarios">R$ 0,00</div>
+                  <div class="metric-note">receita do escritório</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
 
-        const token = localStorage.getItem("token")
+    <section class="surface-card mb-4">
+      <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <div>
+          <h2 class="section-title mb-0">Lista de processos</h2>
+          <p class="card-text-muted mb-0">Filtre e execute as ações direto na tabela.</p>
+        </div>
+        <button class="btn btn-primary" type="button" id="btnNovoProcesso">Novo processo</button>
+      </div>
+      <div class="card-body">
+        <div class="row g-3 mb-4">
+          <div class="col-lg-5">
+            <label class="app-label" for="filtroTexto">Busca</label>
+            <input id="filtroTexto" class="form-control" placeholder="Número, cliente, tipo ou status">
+          </div>
+          <div class="col-lg-3">
+            <label class="app-label" for="filtroStatus">Status</label>
+            <select id="filtroStatus" class="form-select">
+              <option value="">Todos</option>
+              <option value="Em andamento">Em andamento</option>
+              <option value="Concluído">Concluído</option>
+              <option value="Arquivado">Arquivado</option>
+              <option value="Suspenso">Suspenso</option>
+            </select>
+          </div>
+          <div class="col-lg-4">
+            <label class="app-label" for="filtroCliente">Cliente</label>
+            <select id="filtroCliente" class="form-select">
+              <option value="">Todos</option>
+            </select>
+          </div>
+        </div>
 
-        if (!token) {
-            window.location.href = "/login.html"
+        <div class="table-responsive">
+          <table class="table table-modern align-middle mb-0">
+            <thead>
+              <tr>
+                <th>Número</th>
+                <th>Cliente</th>
+                <th>Status</th>
+                <th>Andamento</th>
+                <th>Custo</th>
+                <th>Honorário</th>
+                <th>Data</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="listaProcessos"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div class="modal fade" id="processoModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+      <div class="modal-content border-0 shadow modal-saas">
+        <div class="modal-header modal-header-soft">
+          <div>
+            <div class="text-uppercase text-muted small fw-semibold" id="processoModalSubtitulo">Novo processo</div>
+            <h5 class="modal-title mb-0" id="processoModalTitulo">Novo processo</h5>
+            <p class="small text-muted mb-0">Preencha os dados principais e mantenha o processo organizado desde a abertura.</p>
+          </div>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+        </div>
+        <div class="modal-body modal-saas-body">
+          <form id="formProcessoModal">
+            <input type="hidden" id="processoModalId">
+            <div class="row g-4">
+              <div class="col-lg-8">
+                <div class="modal-panel h-100">
+                  <div class="card-header">
+                    <h6 class="mb-0">Dados do processo</h6>
+                    <p class="small text-muted mb-0">Informações cadastrais e financeiras do caso.</p>
+                  </div>
+                  <div class="card-body">
+                    <div class="row g-3">
+                      <div class="col-md-6">
+                        <label class="app-label" for="numero_processo">Número do processo</label>
+                        <input id="numero_processo" class="form-control" required>
+                      </div>
+                      <div class="col-md-6">
+                        <label class="app-label" for="cliente_id">Cliente</label>
+                        <select id="cliente_id" class="form-select" required>
+                          <option value="">Selecione</option>
+                        </select>
+                      </div>
+                      <div class="col-md-6">
+                        <label class="app-label" for="tipo">Tipo</label>
+                        <input id="tipo" class="form-control" placeholder="Ex.: Civil, Trabalhista">
+                      </div>
+                      <div class="col-md-6">
+                        <label class="app-label" for="status">Status</label>
+                        <select id="status" class="form-select">
+                          <option>Em andamento</option>
+                          <option>Concluído</option>
+                          <option>Arquivado</option>
+                          <option>Suspenso</option>
+                        </select>
+                      </div>
+                      <div class="col-md-4">
+                        <label class="app-label" for="andamento_percentual">Andamento (%)</label>
+                        <input id="andamento_percentual" type="number" min="0" max="100" value="0" class="form-control">
+                      </div>
+                      <div class="col-md-8">
+                        <label class="app-label" for="andamento_descricao">Etapa atual</label>
+                        <input id="andamento_descricao" class="form-control" placeholder="Ex.: Petição inicial protocolada">
+                      </div>
+                      <div class="col-md-6">
+                        <label class="app-label" for="custo_processo">Custo do processo</label>
+                        <input id="custo_processo" type="number" step="0.01" min="0" value="0" class="form-control">
+                      </div>
+                      <div class="col-md-6">
+                        <label class="app-label" for="honorario_escritorio">Honorário do escritório</label>
+                        <input id="honorario_escritorio" type="number" step="0.01" min="0" value="0" class="form-control">
+                      </div>
+                      <div class="col-12">
+                        <label class="app-label" for="descricao">Descrição</label>
+                        <textarea id="descricao" class="form-control" rows="4" placeholder="Resumo do caso"></textarea>
+                      </div>
+                      <div class="col-md-6">
+                        <label class="app-label" for="data_abertura">Data de abertura</label>
+                        <input id="data_abertura" type="date" class="form-control">
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-lg-4">
+                <div class="modal-side">
+                  <div class="soft-card mb-3">
+                    <div class="mini-label mb-1">Resumo</div>
+                    <div class="mini-value" id="processoModalResumo">Novo processo</div>
+                    <div class="small text-muted" id="processoModalSubresumo">Criação inicial</div>
+                  </div>
+                  <div class="soft-card mb-3">
+                    <div class="mini-label mb-1">Pontos rápidos</div>
+                    <ul class="small text-muted mb-0 ps-3">
+                      <li>Vincule ao cliente correto.</li>
+                      <li>Preencha custos e honorários.</li>
+                      <li>Use a etapa atual para leitura rápida.</li>
+                    </ul>
+                  </div>
+                  <div class="soft-card">
+                    <div class="mini-label mb-1">Dica</div>
+                    <div class="small text-muted">Mantenha o status alinhado com o andamento para não perder a visão operacional.</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="modal-footer-soft d-flex align-items-center justify-content-between gap-3 mt-4 flex-wrap">
+              <div id="msgProcessoModal" class="small"></div>
+              <div class="d-flex gap-2">
+                <button class="btn btn-primary" type="submit" id="btnSalvarProcesso">Salvar</button>
+                <button class="btn btn-outline-dark" type="button" data-bs-dismiss="modal">Cancelar</button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="andamentoModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content border-0 shadow modal-saas">
+        <div class="modal-header modal-header-soft">
+          <div>
+            <div class="text-uppercase text-muted small fw-semibold">Andamento</div>
+            <h5 class="modal-title mb-0" id="andamentoModalTitulo">Atualizar andamento</h5>
+            <p class="small text-muted mb-0" id="andamentoModalSubtitulo">Registre a evolução com observação e custo extra.</p>
+          </div>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+        </div>
+        <div class="modal-body modal-saas-body">
+          <input type="hidden" id="andamentoProcessoId">
+          <div class="row g-4">
+            <div class="col-lg-7">
+              <div class="modal-panel h-100">
+                <div class="card-header">
+                  <h6 class="mb-0">Atualização de andamento</h6>
+                  <p class="small text-muted mb-0">Campos para registrar a movimentação atual.</p>
+                </div>
+                <div class="card-body">
+                  <div class="row g-3">
+                    <div class="col-md-4">
+                      <label class="app-label" for="novo_andamento_percentual">Percentual</label>
+                      <input id="novo_andamento_percentual" type="number" min="0" max="100" value="0" class="form-control">
+                    </div>
+                    <div class="col-md-8">
+                      <label class="app-label" for="novo_andamento_descricao">Descrição</label>
+                      <input id="novo_andamento_descricao" class="form-control">
+                    </div>
+                    <div class="col-md-6">
+                      <label class="app-label" for="novo_status">Status</label>
+                      <select id="novo_status" class="form-select">
+                        <option>Em andamento</option>
+                        <option>Concluído</option>
+                        <option>Arquivado</option>
+                        <option>Suspenso</option>
+                      </select>
+                    </div>
+                    <div class="col-md-6">
+                      <label class="app-label" for="custo_extra">Custo extra</label>
+                      <input id="custo_extra" type="number" step="0.01" min="0" value="0" class="form-control">
+                    </div>
+                    <div class="col-12">
+                      <label class="app-label" for="observacao">Observação</label>
+                      <textarea id="observacao" class="form-control" rows="3" placeholder="Notas internas"></textarea>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-lg-5">
+              <div class="modal-side">
+                <div class="soft-card mb-3">
+                  <div class="mini-label mb-1">Processo</div>
+                  <div class="mini-value" id="andamentoProcessoResumo">-</div>
+                </div>
+                <div class="soft-card mb-3">
+                  <div class="mini-label mb-1">Leitura rápida</div>
+                  <div class="small text-muted" id="andamentoProcessoMeta">Atualize percentual, status e observação para manter o histórico coerente.</div>
+                </div>
+                <div class="soft-card">
+                  <div class="mini-label mb-1">Dica</div>
+                  <div class="small text-muted">Use observação curta e objetiva para facilitar consultas futuras.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer-soft d-flex align-items-center justify-content-between gap-3 mt-4 flex-wrap">
+            <div id="msgAndamento" class="small"></div>
+            <div class="d-flex gap-2">
+              <button class="btn btn-success" type="button" id="btnSalvarAndamento">Salvar andamento</button>
+              <button class="btn btn-outline-dark" type="button" data-bs-dismiss="modal">Cancelar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/app.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    App.requireAuth('/login.html');
+    App.setCompanyContext({
+      user: document.getElementById('usuarioNome'),
+      company: document.getElementById('empresaNome')
+    });
+    document.getElementById('tenantNome').textContent = document.getElementById('empresaNome').textContent;
+
+    const processosModal = new bootstrap.Modal(document.getElementById('processoModal'));
+    const andamentoModal = new bootstrap.Modal(document.getElementById('andamentoModal'));
+
+    const listaProcessos = document.getElementById('listaProcessos');
+    const filtroTexto = document.getElementById('filtroTexto');
+    const filtroStatus = document.getElementById('filtroStatus');
+    const filtroCliente = document.getElementById('filtroCliente');
+    const btnNovoProcesso = document.getElementById('btnNovoProcesso');
+    const formProcessoModal = document.getElementById('formProcessoModal');
+    const msgProcessoModal = document.getElementById('msgProcessoModal');
+    const msgAndamento = document.getElementById('msgAndamento');
+    const andamentoProcessoId = document.getElementById('andamentoProcessoId');
+    const andamentoModalTitulo = document.getElementById('andamentoModalTitulo');
+    const processoModalTitulo = document.getElementById('processoModalTitulo');
+    const processoModalSubtitulo = document.getElementById('processoModalSubtitulo');
+    const processoModalResumo = document.getElementById('processoModalResumo');
+    const processoModalSubresumo = document.getElementById('processoModalSubresumo');
+    const andamentoModalSubtitulo = document.getElementById('andamentoModalSubtitulo');
+    const andamentoProcessoResumo = document.getElementById('andamentoProcessoResumo');
+    const andamentoProcessoMeta = document.getElementById('andamentoProcessoMeta');
+    const btnSalvarProcesso = document.getElementById('btnSalvarProcesso');
+    const btnSalvarAndamento = document.getElementById('btnSalvarAndamento');
+    const clienteSelect = document.getElementById('cliente_id');
+
+    let processosCache = [];
+    let clientesCache = [];
+
+    function irParaTop() {
+      document.querySelector('.surface-card.mb-4')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function atualizarFiltrosClientes() {
+      const options = ['<option value="">Todos</option>']
+        .concat(clientesCache.map((c) => `<option value="${c.nome}">${App.escapeHtml(c.nome)}</option>`))
+        .join('');
+      filtroCliente.innerHTML = options;
+    }
+
+    function atualizarSelectClientesModal() {
+      clienteSelect.innerHTML = ['<option value="">Selecione</option>']
+        .concat(clientesCache.map((c) => `<option value="${c.id}">${App.escapeHtml(c.nome)}</option>`))
+        .join('');
+    }
+
+    function aplicarFiltros() {
+      const texto = filtroTexto.value.trim().toLowerCase();
+      const status = filtroStatus.value;
+      const cliente = filtroCliente.value;
+
+      return processosCache.filter((item) => {
+        const correspondeTexto = !texto || [
+          item.numero_processo,
+          item.cliente,
+          item.tipo,
+          item.status,
+          item.andamento_descricao
+        ].some((campo) => String(campo || '').toLowerCase().includes(texto));
+        const correspondeStatus = !status || item.status === status;
+        const correspondeCliente = !cliente || item.cliente === cliente;
+        return correspondeTexto && correspondeStatus && correspondeCliente;
+      });
+    }
+
+    function renderizarTabela() {
+      const listaFiltrada = aplicarFiltros();
+
+      listaProcessos.innerHTML = listaFiltrada.length
+        ? listaFiltrada.map((p) => `
+            <tr>
+              <td class="fw-semibold">${App.escapeHtml(p.numero_processo)}</td>
+              <td>${App.escapeHtml(p.cliente)}</td>
+              <td><span class="badge-soft">${App.escapeHtml(p.status || '-')}</span></td>
+              <td>
+                <div class="fw-semibold">${App.escapeHtml(p.andamento_descricao || '-')}</div>
+                <div class="small text-muted">${p.andamento_percentual || 0}% concluído</div>
+              </td>
+              <td>${App.formatCurrency(p.custo_processo)}</td>
+              <td>${App.formatCurrency(p.honorario_escritorio)}</td>
+              <td>${App.formatDate(p.data_abertura)}</td>
+              <td class="text-end">
+                <div class="btn-group btn-group-sm" role="group">
+                  <button class="btn btn-outline-primary" type="button" onclick="abrirEdicao(${p.id})">Editar</button>
+                  <button class="btn btn-outline-success" type="button" onclick="abrirAndamento(${p.id})">Andamento</button>
+                  <button class="btn btn-outline-secondary" type="button" onclick="imprimirProcesso(${p.id})">Imprimir</button>
+                  <button class="btn btn-outline-dark" type="button" onclick="excluirProcesso(${p.id})">Excluir</button>
+                </div>
+              </td>
+            </tr>
+          `).join('')
+        : '<tr><td colspan="8"><div class="empty-state mb-0">Nenhum processo encontrado com os filtros atuais.</div></td></tr>';
+
+      document.getElementById('qtdProcessos').textContent = processosCache.length;
+      document.getElementById('totalCustos').textContent = App.formatCurrency(
+        processosCache.reduce((sum, item) => sum + Number(item.custo_processo || 0), 0)
+      );
+      document.getElementById('totalHonorarios').textContent = App.formatCurrency(
+        processosCache.reduce((sum, item) => sum + Number(item.honorario_escritorio || 0), 0)
+      );
+    }
+
+    async function carregarClientes() {
+      const response = await App.apiFetch('/clientes');
+      clientesCache = await response.json();
+      atualizarSelectClientesModal();
+      atualizarFiltrosClientes();
+    }
+
+    async function carregarProcessos() {
+      const response = await App.apiFetch('/processos');
+      processosCache = await response.json();
+      renderizarTabela();
+    }
+
+    function limparFormProcesso() {
+      formProcessoModal.reset();
+      document.getElementById('processoModalId').value = '';
+      document.getElementById('andamento_percentual').value = 0;
+      document.getElementById('custo_processo').value = 0;
+      document.getElementById('honorario_escritorio').value = 0;
+      msgProcessoModal.textContent = '';
+      processoModalTitulo.textContent = 'Novo processo';
+      processoModalSubtitulo.textContent = 'Novo processo';
+      processoModalResumo.textContent = 'Novo processo';
+      processoModalSubresumo.textContent = 'Criação inicial';
+      btnSalvarProcesso.textContent = 'Salvar';
+    }
+
+    function preencherModalProcesso(processo) {
+      limparFormProcesso();
+      document.getElementById('processoModalId').value = processo?.id || '';
+      if (!processo) return;
+
+      processoModalTitulo.textContent = 'Editar processo';
+      processoModalSubtitulo.textContent = 'Edição de processo';
+      processoModalResumo.textContent = processo.numero_processo || 'Editar processo';
+      processoModalSubresumo.textContent = processo.cliente ? `Cliente: ${processo.cliente}` : 'Ajuste os dados cadastrados';
+      btnSalvarProcesso.textContent = 'Salvar alterações';
+
+      document.getElementById('numero_processo').value = processo.numero_processo || '';
+      document.getElementById('cliente_id').value = processo.cliente_id || '';
+      document.getElementById('tipo').value = processo.tipo || '';
+      document.getElementById('status').value = processo.status || 'Em andamento';
+      document.getElementById('andamento_percentual').value = processo.andamento_percentual || 0;
+      document.getElementById('andamento_descricao').value = processo.andamento_descricao || '';
+      document.getElementById('custo_processo').value = processo.custo_processo || 0;
+      document.getElementById('honorario_escritorio').value = processo.honorario_escritorio || 0;
+      document.getElementById('descricao').value = processo.descricao || '';
+      document.getElementById('data_abertura').value = processo.data_abertura || '';
+    }
+
+    async function abrirNovoProcesso() {
+      limparFormProcesso();
+      processoModalResumo.textContent = 'Novo processo';
+      processoModalSubresumo.textContent = 'Criação inicial';
+      processosModal.show();
+    }
+
+    async function abrirEdicao(id) {
+      try {
+        const response = await App.apiFetch(`/processos/${id}`);
+        const processo = await response.json();
+        preencherModalProcesso(processo);
+        processosModal.show();
+      } catch (error) {
+        alert(error.message);
+      }
+    }
+
+    function montarConteudoImpressao(processo) {
+      const dataAtual = new Date().toLocaleDateString('pt-BR');
+      const janela = window.open('', '_blank', 'width=900,height=700');
+
+      if (!janela) {
+        alert('Permita pop-ups para imprimir o processo.');
+        return null;
+      }
+
+      const andamentos = Array.isArray(processo.andamentos) ? processo.andamentos : [];
+      const andamentosHtml = andamentos.length
+        ? andamentos.map((item) => `
+            <tr>
+              <td>${App.escapeHtml(App.formatDate(item.created_at))}</td>
+              <td>${App.escapeHtml(String(item.andamento_percentual || 0))}%</td>
+              <td>${App.escapeHtml(item.andamento_descricao || '-')}</td>
+              <td>${App.escapeHtml(item.observacao || '-')}</td>
+              <td>${App.formatCurrency(item.custo_extra || 0)}</td>
+            </tr>
+          `).join('')
+        : `<tr><td colspan="5">Nenhum andamento registrado.</td></tr>`;
+
+      janela.document.write(`
+        <!DOCTYPE html>
+        <html lang="pt-BR">
+        <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Processo ${App.escapeHtml(processo.numero_processo || '')}</title>
+          <style>
+            :root {
+              color-scheme: light;
+            }
+            * { box-sizing: border-box; }
+            body {
+              margin: 0;
+              font-family: Arial, Helvetica, sans-serif;
+              color: #1f2937;
+              background: #f3f6fa;
+              padding: 24px;
+            }
+            .sheet {
+              max-width: 960px;
+              margin: 0 auto;
+              background: #fff;
+              border: 1px solid #dbe3ee;
+              border-radius: 18px;
+              padding: 28px;
+              box-shadow: 0 18px 60px rgba(15, 23, 42, 0.08);
+            }
+            .header {
+              display: flex;
+              justify-content: space-between;
+              gap: 16px;
+              align-items: flex-start;
+              padding-bottom: 18px;
+              border-bottom: 1px solid #e5ecf5;
+              margin-bottom: 22px;
+            }
+            .brand {
+              font-size: 14px;
+              text-transform: uppercase;
+              letter-spacing: 0.08em;
+              color: #64748b;
+              font-weight: 700;
+            }
+            h1 {
+              margin: 6px 0 8px;
+              font-size: 24px;
+              color: #0f172a;
+            }
+            .meta {
+              color: #64748b;
+              font-size: 13px;
+              line-height: 1.6;
+            }
+            .pill {
+              display: inline-flex;
+              align-items: center;
+              padding: 8px 12px;
+              border-radius: 999px;
+              background: #eef5fb;
+              color: #1f4f78;
+              font-size: 12px;
+              font-weight: 700;
+            }
+            .grid {
+              display: grid;
+              grid-template-columns: repeat(2, minmax(0, 1fr));
+              gap: 14px;
+              margin-bottom: 18px;
+            }
+            .card {
+              background: #f8fbff;
+              border: 1px solid #dbe3ee;
+              border-radius: 14px;
+              padding: 14px;
+            }
+            .label {
+              display: block;
+              font-size: 11px;
+              text-transform: uppercase;
+              letter-spacing: 0.06em;
+              color: #64748b;
+              font-weight: 700;
+              margin-bottom: 6px;
+            }
+            .value {
+              font-size: 15px;
+              font-weight: 700;
+              color: #0f172a;
+            }
+            .section {
+              margin-top: 18px;
+              padding-top: 18px;
+              border-top: 1px solid #e5ecf5;
+            }
+            .section h2 {
+              margin: 0 0 12px;
+              font-size: 16px;
+              color: #0f172a;
+            }
+            .text {
+              font-size: 14px;
+              line-height: 1.7;
+              color: #334155;
+              white-space: pre-wrap;
+            }
+            .details {
+              display: grid;
+              grid-template-columns: repeat(2, minmax(0, 1fr));
+              gap: 12px;
+            }
+            .detail {
+              background: #fff;
+              border: 1px solid #dbe3ee;
+              border-radius: 12px;
+              padding: 12px;
+            }
+            .detail .label {
+              margin-bottom: 4px;
+            }
+            table {
+              width: 100%;
+              border-collapse: collapse;
+              font-size: 13px;
+            }
+            th, td {
+              text-align: left;
+              padding: 10px 8px;
+              border-bottom: 1px solid #e5ecf5;
+              vertical-align: top;
+            }
+            th {
+              color: #475569;
+              font-size: 11px;
+              text-transform: uppercase;
+              letter-spacing: 0.06em;
+            }
+            .footer {
+              margin-top: 28px;
+              display: flex;
+              justify-content: space-between;
+              gap: 16px;
+              align-items: center;
+              color: #64748b;
+              font-size: 12px;
+              border-top: 1px solid #e5ecf5;
+              padding-top: 14px;
+            }
+            @media print {
+              body { background: #fff; padding: 0; }
+              .sheet { box-shadow: none; border: 0; border-radius: 0; }
+              .footer { page-break-inside: avoid; }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="sheet">
+            <div class="header">
+              <div>
+                <div class="brand">Painel do Escritório</div>
+                <h1>Processo ${App.escapeHtml(processo.numero_processo || '-')}</h1>
+                <div class="meta">
+                  Cliente: ${App.escapeHtml(processo.cliente || '-')}<br>
+                  Tipo: ${App.escapeHtml(processo.tipo || '-')}<br>
+                  Data de abertura: ${App.escapeHtml(processo.data_abertura ? App.formatDate(processo.data_abertura) : '-')}
+                </div>
+              </div>
+              <div class="pill">${App.escapeHtml(processo.status || 'Sem status')}</div>
+            </div>
+
+            <div class="grid">
+              <div class="card">
+                <span class="label">Andamento</span>
+                <div class="value">${App.escapeHtml(String(processo.andamento_percentual || 0))}%</div>
+                <div class="meta">${App.escapeHtml(processo.andamento_descricao || 'Sem descrição de andamento')}</div>
+              </div>
+              <div class="card">
+                <span class="label">Honorário do escritório</span>
+                <div class="value">${App.formatCurrency(processo.honorario_escritorio || 0)}</div>
+              </div>
+              <div class="card">
+                <span class="label">Custo do processo</span>
+                <div class="value">${App.formatCurrency(processo.custo_processo || 0)}</div>
+              </div>
+              <div class="card">
+                <span class="label">Responsável</span>
+                <div class="value">${App.escapeHtml(processo.usuario_nome || '-')}</div>
+                <div class="meta">${App.escapeHtml(processo.empresa_nome || '')}</div>
+              </div>
+            </div>
+
+            <div class="section">
+              <h2>Dados do cliente</h2>
+              <div class="details">
+                <div class="detail">
+                  <span class="label">Nome</span>
+                  <div class="value">${App.escapeHtml(processo.cliente || '-')}</div>
+                </div>
+                <div class="detail">
+                  <span class="label">CPF/CNPJ</span>
+                  <div class="value">${App.escapeHtml(processo.cliente_cpf || '-')}</div>
+                </div>
+                <div class="detail">
+                  <span class="label">Telefone</span>
+                  <div class="value">${App.escapeHtml(processo.cliente_telefone || '-')}</div>
+                </div>
+                <div class="detail">
+                  <span class="label">E-mail</span>
+                  <div class="value">${App.escapeHtml(processo.cliente_email || '-')}</div>
+                </div>
+                <div class="detail" style="grid-column: 1 / -1;">
+                  <span class="label">Endereço</span>
+                  <div class="value">${App.escapeHtml(processo.cliente_endereco || '-')}</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="section">
+              <h2>Dados completos do processo</h2>
+              <div class="details">
+                <div class="detail">
+                  <span class="label">Número do processo</span>
+                  <div class="value">${App.escapeHtml(processo.numero_processo || '-')}</div>
+                </div>
+                <div class="detail">
+                  <span class="label">Tipo</span>
+                  <div class="value">${App.escapeHtml(processo.tipo || '-')}</div>
+                </div>
+                <div class="detail">
+                  <span class="label">Status</span>
+                  <div class="value">${App.escapeHtml(processo.status || '-')}</div>
+                </div>
+                <div class="detail">
+                  <span class="label">Data de abertura</span>
+                  <div class="value">${App.escapeHtml(processo.data_abertura ? App.formatDate(processo.data_abertura) : '-')}</div>
+                </div>
+                <div class="detail">
+                  <span class="label">Última movimentação</span>
+                  <div class="value">${App.escapeHtml(processo.data_ultima_movimentacao ? App.formatDate(processo.data_ultima_movimentacao) : '-')}</div>
+                </div>
+                <div class="detail">
+                  <span class="label">ID interno</span>
+                  <div class="value">${App.escapeHtml(String(processo.id || '-'))}</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="section">
+              <h2>Descrição</h2>
+              <div class="text">${App.escapeHtml(processo.descricao || 'Sem descrição cadastrada.')}</div>
+            </div>
+
+            <div class="section">
+              <h2>Histórico de andamentos</h2>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Data</th>
+                    <th>%</th>
+                    <th>Etapa</th>
+                    <th>Observação</th>
+                    <th>Custo extra</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${andamentosHtml}
+                </tbody>
+              </table>
+            </div>
+
+            <div class="footer">
+              <div>Impresso em ${dataAtual}</div>
+              <div>${App.escapeHtml(processo.numero_processo || '')}</div>
+            </div>
+          </div>
+        </body>
+        </html>
+      `);
+      janela.document.close();
+      return janela;
+    }
+
+    async function imprimirProcesso(id) {
+      try {
+        const [processoResp, andamentosResp] = await Promise.all([
+          App.apiFetch(`/processos/${id}`),
+          App.apiFetch(`/processos/${id}/andamentos`)
+        ]);
+        const processo = await processoResp.json();
+        processo.andamentos = await andamentosResp.json();
+        processo.empresa_nome = document.getElementById('empresaNome')?.textContent || '-';
+        processo.usuario_nome = document.getElementById('usuarioNome')?.textContent || '-';
+        const janela = montarConteudoImpressao(processo);
+        if (!janela) {
+          return;
+        }
+        setTimeout(() => {
+          janela.focus();
+          janela.print();
+        }, 250);
+      } catch (error) {
+        alert(error.message);
+      }
+    }
+
+    async function abrirAndamento(id) {
+      const processo = processosCache.find((item) => String(item.id) === String(id));
+      andamentoProcessoId.value = id;
+      andamentoModalTitulo.textContent = processo ? `Andamento - ${processo.numero_processo}` : 'Atualizar andamento';
+      andamentoModalSubtitulo.textContent = 'Registre a evolução com observação e custo extra.';
+      andamentoProcessoResumo.textContent = processo ? processo.numero_processo : '-';
+      andamentoProcessoMeta.textContent = processo ? `Cliente: ${processo.cliente || '-'} • Status atual: ${processo.status || '-'}` : 'Atualize percentual, status e observação para manter o histórico coerente.';
+      msgAndamento.textContent = '';
+      document.getElementById('novo_andamento_percentual').value = processo?.andamento_percentual || 0;
+      document.getElementById('novo_andamento_descricao').value = processo?.andamento_descricao || '';
+      document.getElementById('novo_status').value = processo?.status || 'Em andamento';
+      document.getElementById('custo_extra').value = 0;
+      document.getElementById('observacao').value = '';
+      andamentoModal.show();
+    }
+
+    async function excluirProcesso(id) {
+      const processo = processosCache.find((item) => String(item.id) === String(id));
+      if (!confirm(`Deseja excluir o processo ${processo ? processo.numero_processo : ''}?`)) {
+        return;
+      }
+
+      try {
+        const response = await App.apiFetch(`/processos/${id}`, { method: 'DELETE' });
+        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(data.msg || 'Erro ao excluir processo');
+        }
+        await carregarProcessos();
+      } catch (error) {
+        alert(error.message);
+      }
+    }
+
+    window.abrirEdicao = abrirEdicao;
+    window.abrirAndamento = abrirAndamento;
+    window.imprimirProcesso = imprimirProcesso;
+    window.excluirProcesso = excluirProcesso;
+
+    btnNovoProcesso.addEventListener('click', abrirNovoProcesso);
+
+    filtroTexto.addEventListener('input', renderizarTabela);
+    filtroStatus.addEventListener('change', renderizarTabela);
+    filtroCliente.addEventListener('change', renderizarTabela);
+
+    formProcessoModal.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      msgProcessoModal.textContent = '';
+      const processoId = document.getElementById('processoModalId').value;
+
+      const payload = {
+        numero_processo: document.getElementById('numero_processo').value.trim(),
+        cliente_id: clienteSelect.value,
+        tipo: document.getElementById('tipo').value.trim(),
+        status: document.getElementById('status').value,
+        andamento_percentual: document.getElementById('andamento_percentual').value,
+        andamento_descricao: document.getElementById('andamento_descricao').value.trim(),
+        custo_processo: document.getElementById('custo_processo').value,
+        honorario_escritorio: document.getElementById('honorario_escritorio').value,
+        descricao: document.getElementById('descricao').value.trim(),
+        data_abertura: document.getElementById('data_abertura').value
+      };
+
+      try {
+        const response = await App.apiFetch(processoId ? `/processos/${processoId}` : '/processos', {
+          method: processoId ? 'PUT' : 'POST',
+          body: JSON.stringify(payload)
+        });
+
+        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(data.msg || 'Falha ao salvar processo');
         }
 
-        // mostrar usuário logado
-        const payload = JSON.parse(atob(token.split('.')[1]))
-        document.getElementById("usuarioLogado").innerText = payload.nome
+        msgProcessoModal.textContent = data.msg;
+        msgProcessoModal.className = 'small text-success';
+        await carregarProcessos();
+        processosModal.hide();
+      } catch (error) {
+        msgProcessoModal.textContent = error.message;
+        msgProcessoModal.className = 'small text-danger';
+      }
+    });
 
-        // voltar
-        function voltar() {
-            window.location.href = "/admin.html"
+    document.getElementById('btnSalvarAndamento').addEventListener('click', async () => {
+      const id = andamentoProcessoId.value;
+      if (!id) {
+        msgAndamento.textContent = 'Selecione um processo.';
+        msgAndamento.className = 'small text-danger';
+        return;
+      }
+
+      try {
+        const response = await App.apiFetch(`/processos/${id}/andamentos`, {
+          method: 'POST',
+          body: JSON.stringify({
+            andamento_percentual: document.getElementById('novo_andamento_percentual').value,
+            andamento_descricao: document.getElementById('novo_andamento_descricao').value.trim(),
+            status: document.getElementById('novo_status').value,
+            custo_extra: document.getElementById('custo_extra').value,
+            observacao: document.getElementById('observacao').value.trim()
+          })
+        });
+
+        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(data.msg || 'Erro ao atualizar andamento');
         }
 
-        // logout
-        function logout() {
-            localStorage.removeItem("token")
-            window.location.href = "/index.html"
-        }
+        msgAndamento.textContent = data.msg;
+        msgAndamento.className = 'small text-success';
+        await carregarProcessos();
+        andamentoModal.hide();
+      } catch (error) {
+        msgAndamento.textContent = error.message;
+        msgAndamento.className = 'small text-danger';
+      }
+    });
 
-        //////////////////////////////////////////////////////////
-        // BUSCAR CLIENTE
-        //////////////////////////////////////////////////////////
-
-        document.getElementById("buscarCliente")
-            .addEventListener("keyup", async function () {
-
-                const termo = this.value
-
-                if (termo.length < 2) {
-                    document.getElementById("resultadoClientes").innerHTML = ""
-                    return
-                }
-
-                const resposta = await fetch("/clientes", {
-                    headers: {
-                        "Authorization": "Bearer " + token
-                    }
-                })
-
-                const clientes = await resposta.json()
-
-                let html = ""
-
-                clientes
-                    .filter(c => c.nome.toLowerCase().includes(termo.toLowerCase()))
-                    .forEach(c => {
-
-                        html += `
-<a class="list-group-item list-group-item-action"
-onclick="selecionarCliente(${c.id},'${c.nome}')">
-
-${c.nome}
-
-</a>
-`
-
-                    })
-
-                document.getElementById("resultadoClientes").innerHTML = html
-
-            })
-
-        function selecionarCliente(id, nome) {
-
-            document.getElementById("cliente_id").value = id
-            document.getElementById("buscarCliente").value = nome
-            document.getElementById("resultadoClientes").innerHTML = ""
-
-        }
-
-        //////////////////////////////////////////////////////////
-        // CADASTRAR PROCESSO
-        //////////////////////////////////////////////////////////
-
-        document.getElementById("formProcesso")
-            .addEventListener("submit", async function (e) {
-
-                e.preventDefault()
-
-                const processo = {
-
-                    numero_processo: document.getElementById("numero_processo").value,
-                    cliente_id: document.getElementById("cliente_id").value,
-                    tipo: document.getElementById("tipo").value,
-                    status: document.getElementById("status").value,
-                    descricao: document.getElementById("descricao").value,
-                    data_abertura: document.getElementById("data_abertura").value
-
-                }
-
-                await fetch("/processos", {
-
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Authorization": "Bearer " + token
-                    },
-                    body: JSON.stringify(processo)
-
-                })
-
-                alert("Processo cadastrado")
-
-                listarProcessos()
-
-            })
-
-        //////////////////////////////////////////////////////////
-        // LISTAR PROCESSOS
-        //////////////////////////////////////////////////////////
-
-        async function listarProcessos() {
-
-            const resposta = await fetch("/processos", {
-                headers: {
-                    "Authorization": "Bearer " + token
-                }
-            })
-
-            const processos = await resposta.json()
-
-            let html = ""
-
-            processos.forEach(p => {
-
-                html += `
-<tr>
-<td>${p.numero_processo}</td>
-<td>${p.cliente}</td>
-<td>${p.tipo}</td>
-<td>${p.status}</td>
-<td>${p.data_abertura}</td>
-</tr>
-`
-
-            })
-
-            document.getElementById("listaProcessos").innerHTML = html
-
-        }
-
-        listarProcessos()
-
-    </script>
-
+    (async () => {
+      await carregarClientes();
+      await carregarProcessos();
+    })();
+  </script>
 </body>
-
 </html>

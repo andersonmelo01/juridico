@@ -1,224 +1,959 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 
 <head>
     <meta charset="UTF-8">
-    <title>Cadastro de Cliente</title>
-
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-
-    <style>
-        body {
-            background: #f4f6f9;
-        }
-
-        .card {
-            border: none;
-            border-radius: 10px;
-            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
-        }
-
-        .header {
-            background: #2c3e50;
-            color: white;
-            padding: 15px;
-            border-radius: 10px 10px 0 0;
-        }
-    </style>
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clientes | Sistema Jurídico</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/app.css">
 </head>
 
 <body>
-    <nav class="navbar navbar-dark bg-dark">
-        <div class="container-fluid">
-
-            <span class="navbar-brand mb-0 h1">⚖ Sistema Jurídico</span>
-
-            <div class="d-flex align-items-center">
-
-                <span class="text-white me-3">
-                    Usuário: <strong id="usuarioLogado"></strong>
-                </span>
-
-                <button class="btn btn-light btn-sm me-2" onclick="voltar()">
-                    ← Voltar
-                </button>
-
-                <button class="btn btn-danger btn-sm" onclick="logout()">
-                    Sair
-                </button>
-
+    <nav class="navbar navbar-expand-lg app-navbar">
+        <div class="container py-2">
+            <a class="navbar-brand d-flex align-items-center gap-3" href="/admin.html">
+                <span class="brand-mark">⚖</span>
+                <span class="fw-semibold">Painel do Escritório</span>
+            </a>
+            <div class="ms-auto d-flex flex-wrap gap-2 align-items-center">
+                <span class="nav-pill">Empresa: <strong id="empresaNome">-</strong></span>
+                <span class="nav-pill">Usuário: <strong id="usuarioNome">-</strong></span>
+                <button class="btn btn-outline-dark btn-sm" onclick="window.location.href='/admin.html'">Voltar</button>
+                <button class="btn btn-outline-dark btn-sm" onclick="App.logout('/login.html')">Sair</button>
             </div>
-
         </div>
     </nav>
 
-    <div class="container mt-5">
-
-        <div class="card">
-
-            <div class="header">
-                <h4>Cadastro de Cliente</h4>
-            </div>
-
-            <div class="card-body">
-
-                <form id="formCliente">
-
-                    <div class="row">
-
-                        <div class="col-md-6 mb-3">
-                            <label>Nome</label>
-                            <input type="text" class="form-control" id="nome" required>
-                        </div>
-
-                        <div class="col-md-6 mb-3">
-                            <label>CPF</label>
-                            <input type="text" class="form-control" id="cpf">
-                        </div>
-
-                        <div class="col-md-6 mb-3">
-                            <label>Telefone</label>
-                            <input type="text" class="form-control" id="telefone">
-                        </div>
-
-                        <div class="col-md-6 mb-3">
-                            <label>Email</label>
-                            <input type="email" class="form-control" id="email">
-                        </div>
-
-                        <div class="col-12 mb-3">
-                            <label>Endereço</label>
-                            <input type="text" class="form-control" id="endereco">
-                        </div>
-
+    <main class="page-wrap container py-4 py-lg-5">
+        <section class="page-hero mb-4">
+            <div class="row g-4 align-items-center">
+                <div class="col-lg-8">
+                    <span class="eyebrow">CRM do escritório</span>
+                    <h1 class="display-title mt-3 mb-3">Clientes</h1>
+                    <p class="lead-copy mb-0">
+                        Liste, edite, exclua e acompanhe o histórico de processos de cada cliente em uma visão limpa e operacional.
+                    </p>
+                    <div class="mt-3">
+                        <span class="badge-soft">Tenant: <strong id="tenantNome">-</strong></span>
                     </div>
-
-                    <button class="btn btn-primary">
-                        Salvar Cliente
-                    </button>
-
-                </form>
-
-                <hr>
-
-                <h5>Clientes cadastrados</h5>
-
-                <table class="table table-striped">
-
-                    <thead>
-                        <tr>
-                            <th>Nome</th>
-                            <th>CPF</th>
-                            <th>Telefone</th>
-                            <th>Email</th>
-                        </tr>
-                    </thead>
-
-                    <tbody id="listaClientes"></tbody>
-
-                </table>
-
+                </div>
+                <div class="col-lg-4">
+                    <div class="glass-card p-3 p-md-4">
+                        <div class="row g-3">
+                            <div class="col-6">
+                                <div class="metric-card h-100">
+                                    <div class="metric-label">Clientes</div>
+                                    <div class="metric-value" id="qtdClientes">0</div>
+                                    <div class="metric-note">cadastrados</div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="metric-card h-100">
+                                    <div class="metric-label">Com processos</div>
+                                    <div class="metric-value" id="qtdComProcessos">0</div>
+                                    <div class="metric-note">vinculados</div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="metric-card">
+                                    <div class="metric-label">Processos totais</div>
+                                    <div class="metric-value" id="qtdProcessos">0</div>
+                                    <div class="metric-note">registrados na base</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
+        </section>
 
+        <section class="surface-card">
+            <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-3">
+                <div>
+                    <h2 class="section-title mb-0">Lista de clientes</h2>
+                    <p class="card-text-muted mb-0">Filtro, edição, exclusão e histórico de processos em um único fluxo.</p>
+                </div>
+                <button class="btn btn-primary" type="button" id="btnNovoCliente">Novo cliente</button>
+            </div>
+            <div class="card-body">
+                <div class="row g-3 mb-4">
+                    <div class="col-lg-8">
+                        <label class="app-label" for="filtroCliente">Busca</label>
+                        <input id="filtroCliente" class="form-control" placeholder="Nome, documento, telefone, WhatsApp, e-mail ou endereço">
+                    </div>
+                    <div class="col-lg-4 d-flex align-items-end">
+                        <div class="w-100">
+                            <label class="app-label">&nbsp;</label>
+                            <button class="btn btn-outline-dark w-100" type="button" id="btnLimparFiltro">Limpar filtro</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-modern align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>Cliente</th>
+                                <th>Contato</th>
+                                <th>Processos</th>
+                                <th>Última mov.</th>
+                                <th>Criado em</th>
+                                <th class="text-end">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="listaClientes"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <div class="modal fade" id="clienteModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-scrollable">
+            <div class="modal-content border-0 shadow modal-saas">
+                <div class="modal-header modal-header-soft">
+                    <div>
+                        <div class="text-uppercase text-muted small fw-semibold" id="clienteModalSubtitulo">Novo cliente</div>
+                        <h5 class="modal-title mb-0" id="clienteModalTitulo">Novo cliente</h5>
+                        <p class="small text-muted mb-0">Cadastre ou ajuste os dados do cliente com uma visão simples e profissional.</p>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <div class="modal-body modal-saas-body">
+                    <form id="formClienteModal">
+                        <input type="hidden" id="clienteModalId">
+                        <div class="row g-4">
+                            <div class="col-lg-8">
+                                <div class="modal-panel h-100">
+                                    <div class="card-header">
+                                        <h6 class="mb-0">Dados do cliente</h6>
+                                        <p class="small text-muted mb-0">Campos principais para operação diária.</p>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row g-3">
+                                            <div class="col-md-6">
+                                                <label class="app-label" for="nome">Nome</label>
+                                                <input id="nome" class="form-control" required>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="app-label" for="cpf">CPF/CNPJ</label>
+                                                <input id="cpf" class="form-control" placeholder="000.000.000-00 ou 00.000.000/0000-00">
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="app-label" for="telefone">Telefone</label>
+                                                <input id="telefone" class="form-control">
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="app-label" for="whatsapp">WhatsApp</label>
+                                                <input id="whatsapp" class="form-control" placeholder="(00) 00000-0000">
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="app-label" for="email">E-mail</label>
+                                                <input id="email" type="email" class="form-control">
+                                            </div>
+                                            <div class="col-12">
+                                                <label class="app-label" for="endereco">Endereço</label>
+                                                <textarea id="endereco" class="form-control" rows="3"></textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-4">
+                                <div class="modal-side">
+                                    <div class="soft-card mb-3">
+                                        <div class="mini-label mb-1">Resumo</div>
+                                        <div class="mini-value" id="clienteModalResumo">Novo cliente</div>
+                                        <div class="small text-muted" id="clienteModalSubresumo">Criação inicial</div>
+                                    </div>
+                                    <div class="soft-card mb-3">
+                                        <div class="mini-label mb-1">Boas práticas</div>
+                                        <ul class="small text-muted mb-0 ps-3">
+                                            <li>Use CPF ou CNPJ, WhatsApp e e-mail corretos.</li>
+                                            <li>Endereço completo facilita o processo.</li>
+                                            <li>Revise antes de salvar.</li>
+                                        </ul>
+                                    </div>
+                                    <div class="soft-card">
+                                        <div class="mini-label mb-1">Contexto</div>
+                                        <div class="small text-muted">Clientes com processos vinculados não podem ser excluídos.</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer-soft d-flex align-items-center justify-content-between gap-3 mt-4 flex-wrap">
+                            <div id="msgClienteModal" class="small"></div>
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-primary" type="submit" id="btnSalvarCliente">Salvar</button>
+                                <button class="btn btn-outline-dark" type="button" data-bs-dismiss="modal">Cancelar</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
-
     </div>
 
+    <div class="modal fade" id="historicoClienteModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-scrollable">
+            <div class="modal-content border-0 shadow modal-saas">
+                <div class="modal-header modal-header-soft">
+                    <div>
+                        <div class="text-uppercase text-muted small fw-semibold">Histórico de processos</div>
+                        <h5 class="modal-title mb-0" id="historicoClienteTitulo">Cliente</h5>
+                        <p class="small text-muted mb-0">Visão detalhada dos processos vinculados ao cliente.</p>
+                    </div>
+                    <div class="ms-auto me-3">
+                        <button type="button" class="btn btn-outline-dark btn-sm" id="btnImprimirHistoricoCliente">Imprimir histórico</button>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <div class="modal-body modal-saas-body">
+                    <div class="row g-4">
+                        <div class="col-lg-4">
+                            <div class="modal-side">
+                                <div class="soft-card mb-3">
+                                    <div class="mini-label mb-1">Cliente</div>
+                                    <div class="mini-value" id="historicoNome">-</div>
+                                    <div class="small text-muted" id="historicoContato">-</div>
+                                </div>
+                                <div class="soft-card mb-3">
+                                    <div class="mini-label mb-1">Resumo</div>
+                                    <div class="d-flex justify-content-between small mb-2">
+                                        <span>Total de processos</span>
+                                        <strong id="historicoTotal">0</strong>
+                                    </div>
+                                    <div class="d-flex justify-content-between small mb-2">
+                                        <span>Última movimentação</span>
+                                        <strong id="historicoUltima">-</strong>
+                                    </div>
+                                    <div class="d-flex justify-content-between small">
+                                        <span>Cadastrado em</span>
+                                        <strong id="historicoCriado">-</strong>
+                                    </div>
+                                </div>
+                                <div class="soft-card">
+                                    <div class="mini-label mb-1">Endereço</div>
+                                    <div class="small text-muted" id="historicoEndereco">-</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-8">
+                            <div class="modal-panel h-100">
+                                <div class="card-header">
+                                    <h6 class="mb-0">Processos vinculados</h6>
+                                    <p class="small text-muted mb-0">Lista completa com situação e valores.</p>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-modern align-middle mb-0">
+                                            <thead>
+                                                <tr>
+                                                    <th>Número</th>
+                                                    <th>Status</th>
+                                                    <th>Andamento</th>
+                                                    <th>Valores</th>
+                                                    <th class="text-end">Ações</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="historicoProcessosLista"></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/app.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        App.requireAuth('/login.html');
+        App.setCompanyContext({
+            user: document.getElementById('usuarioNome'),
+            company: document.getElementById('empresaNome')
+        });
+        document.getElementById('tenantNome').textContent = document.getElementById('empresaNome').textContent;
 
-        const token = localStorage.getItem("token")
+        const clienteModal = new bootstrap.Modal(document.getElementById('clienteModal'));
+        const historicoClienteModal = new bootstrap.Modal(document.getElementById('historicoClienteModal'));
 
-        if (!token) {
-            window.location.href = "/login.html"
+        const listaClientes = document.getElementById('listaClientes');
+        const filtroCliente = document.getElementById('filtroCliente');
+        const btnNovoCliente = document.getElementById('btnNovoCliente');
+        const btnLimparFiltro = document.getElementById('btnLimparFiltro');
+        const formClienteModal = document.getElementById('formClienteModal');
+        const msgClienteModal = document.getElementById('msgClienteModal');
+        const clienteModalId = document.getElementById('clienteModalId');
+        const clienteModalTitulo = document.getElementById('clienteModalTitulo');
+        const clienteModalSubtitulo = document.getElementById('clienteModalSubtitulo');
+        const clienteModalResumo = document.getElementById('clienteModalResumo');
+        const clienteModalSubresumo = document.getElementById('clienteModalSubresumo');
+        const btnSalvarCliente = document.getElementById('btnSalvarCliente');
+        const historicoClienteTitulo = document.getElementById('historicoClienteTitulo');
+        const historicoNome = document.getElementById('historicoNome');
+        const historicoContato = document.getElementById('historicoContato');
+        const historicoTotal = document.getElementById('historicoTotal');
+        const historicoUltima = document.getElementById('historicoUltima');
+        const historicoCriado = document.getElementById('historicoCriado');
+        const historicoEndereco = document.getElementById('historicoEndereco');
+        const historicoProcessosLista = document.getElementById('historicoProcessosLista');
+
+        const campoNome = document.getElementById('nome');
+        const campoCpf = document.getElementById('cpf');
+        const campoTelefone = document.getElementById('telefone');
+        const campoWhatsapp = document.getElementById('whatsapp');
+        const campoEmail = document.getElementById('email');
+        const campoEndereco = document.getElementById('endereco');
+        const btnImprimirHistoricoCliente = document.getElementById('btnImprimirHistoricoCliente');
+
+        let clienteHistoricoAtual = null;
+        let processosHistoricoAtual = [];
+
+        let clientesCache = [];
+
+        function normalizarTexto(valor) {
+            return String(valor || '').trim().toLowerCase();
         }
 
-        document.getElementById("formCliente")
-            .addEventListener("submit", async function (e) {
+        function atualizarResumo() {
+            document.getElementById('qtdClientes').textContent = clientesCache.length;
+            document.getElementById('qtdComProcessos').textContent = clientesCache.filter((cliente) => Number(cliente.total_processos || 0) > 0).length;
+            document.getElementById('qtdProcessos').textContent = clientesCache.reduce((total, cliente) => total + Number(cliente.total_processos || 0), 0);
+        }
 
-                e.preventDefault()
-
-                const cliente = {
-                    nome: document.getElementById("nome").value,
-                    cpf: document.getElementById("cpf").value,
-                    telefone: document.getElementById("telefone").value,
-                    email: document.getElementById("email").value,
-                    endereco: document.getElementById("endereco").value
+        function filtrarClientes() {
+            const termo = normalizarTexto(filtroCliente.value);
+            return clientesCache.filter((cliente) => {
+                if (!termo) {
+                    return true;
                 }
 
-                await fetch("/clientes", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Authorization": "Bearer " + token
-                    },
-                    body: JSON.stringify(cliente)
-                })
+                return [
+                    cliente.nome,
+                    cliente.documento || cliente.cpf,
+                    cliente.telefone,
+                    cliente.whatsapp,
+                    cliente.email,
+                    cliente.endereco
+                ].some((campo) => normalizarTexto(campo).includes(termo));
+            });
+        }
 
-                alert("Cliente cadastrado")
+        function renderizarTabela() {
+            const clientes = filtrarClientes();
 
-                listarClientes()
+            listaClientes.innerHTML = clientes.length
+                ? clientes.map((cliente) => `
+                    <tr>
+                        <td>
+                            <div class="fw-semibold">${App.escapeHtml(cliente.nome)}</div>
+                            <div class="small text-muted">${App.escapeHtml(cliente.email || '-')}</div>
+                        </td>
+                        <td>
+                            <div>${App.escapeHtml(cliente.telefone || '-')}</div>
+                            <div class="small text-muted">WhatsApp: ${App.escapeHtml(cliente.whatsapp || '-')}</div>
+                            <div class="small text-muted">${App.escapeHtml(cliente.documento || cliente.cpf || '-')}</div>
+                        </td>
+                        <td>
+                            <span class="badge-soft">${App.escapeHtml(String(cliente.total_processos || 0))} processos</span>
+                        </td>
+                        <td>
+                            <div>${cliente.ultima_movimentacao ? App.formatDate(cliente.ultima_movimentacao) : '-'}</div>
+                            <div class="small text-muted">Última atualização</div>
+                        </td>
+                        <td>${App.formatDate(cliente.created_at)}</td>
+                        <td class="text-end">
+                            <div class="btn-group btn-group-sm" role="group">
+                                <button class="btn btn-outline-primary" type="button" onclick="abrirEdicao(${cliente.id})">Editar</button>
+                                <button class="btn btn-outline-secondary" type="button" onclick="abrirHistorico(${cliente.id})">Histórico</button>
+                                <button class="btn btn-outline-dark" type="button" onclick="excluirCliente(${cliente.id})">Excluir</button>
+                            </div>
+                        </td>
+                    </tr>
+                `).join('')
+                : '<tr><td colspan="6"><div class="empty-state mb-0">Nenhum cliente encontrado com o filtro atual.</div></td></tr>';
 
-            })
+            atualizarResumo();
+        }
 
-        async function listarClientes() {
+        function limparFormCliente() {
+            formClienteModal.reset();
+            clienteModalId.value = '';
+            msgClienteModal.textContent = '';
+            clienteModalTitulo.textContent = 'Novo cliente';
+            clienteModalSubtitulo.textContent = 'Novo cliente';
+            clienteModalResumo.textContent = 'Novo cliente';
+            clienteModalSubresumo.textContent = 'Criação inicial';
+            btnSalvarCliente.textContent = 'Salvar';
+        }
 
-            const resposta = await fetch("/clientes", {
-                headers: {
-                    "Authorization": "Bearer " + token
+        function preencherFormulario(cliente) {
+            limparFormCliente();
+            if (!cliente) {
+                return;
+            }
+
+            clienteModalId.value = cliente.id;
+            clienteModalTitulo.textContent = 'Editar cliente';
+            clienteModalSubtitulo.textContent = 'Edição de cliente';
+            clienteModalResumo.textContent = cliente.nome || 'Editar cliente';
+            clienteModalSubresumo.textContent = cliente.email ? `Contato: ${cliente.email}` : 'Ajuste os dados cadastrados';
+            btnSalvarCliente.textContent = 'Salvar alterações';
+
+            campoNome.value = cliente.nome || '';
+            campoCpf.value = cliente.documento || cliente.cpf || '';
+            campoTelefone.value = cliente.telefone || '';
+            campoWhatsapp.value = cliente.whatsapp || '';
+            campoEmail.value = cliente.email || '';
+            campoEndereco.value = cliente.endereco || '';
+        }
+
+        async function carregarClientes() {
+            const response = await App.apiFetch('/clientes');
+            clientesCache = await response.json();
+            renderizarTabela();
+        }
+
+        async function abrirEdicao(id) {
+            try {
+                const response = await App.apiFetch(`/clientes/${id}`);
+                const cliente = await response.json();
+                preencherFormulario(cliente);
+                clienteModal.show();
+            } catch (error) {
+                alert(error.message);
+            }
+        }
+
+        async function abrirHistorico(id) {
+            try {
+                const response = await App.apiFetch(`/clientes/${id}/processos`);
+                const dados = await response.json();
+                const cliente = dados.cliente || {};
+                const processos = Array.isArray(dados.processos) ? dados.processos : [];
+
+                historicoClienteTitulo.textContent = cliente.nome || 'Cliente';
+                historicoNome.textContent = cliente.nome || '-';
+                historicoContato.textContent = [cliente.telefone, cliente.whatsapp, cliente.email].filter(Boolean).join(' • ') || '-';
+                historicoTotal.textContent = String(cliente.total_processos || processos.length || 0);
+                historicoUltima.textContent = cliente.ultima_movimentacao ? App.formatDate(cliente.ultima_movimentacao) : '-';
+                historicoCriado.textContent = cliente.created_at ? App.formatDate(cliente.created_at) : '-';
+                historicoEndereco.textContent = cliente.endereco || '-';
+                clienteHistoricoAtual = cliente;
+                processosHistoricoAtual = processos;
+
+                historicoProcessosLista.innerHTML = processos.length
+                    ? processos.map((processo) => `
+                        <tr>
+                            <td>
+                                <div class="fw-semibold">${App.escapeHtml(processo.numero_processo)}</div>
+                                <div class="small text-muted">${App.escapeHtml(processo.tipo || '-')}</div>
+                            </td>
+                            <td>
+                                <span class="badge-soft">${App.escapeHtml(processo.status || '-')}</span>
+                            </td>
+                            <td>
+                                <div class="fw-semibold">${App.escapeHtml(processo.andamento_descricao || '-')}</div>
+                                <div class="small text-muted">${processo.andamento_percentual || 0}% concluído</div>
+                            </td>
+                            <td>
+                                <div class="small">${App.formatCurrency(processo.custo_processo || 0)}</div>
+                                <div class="small text-muted">Honorário: ${App.formatCurrency(processo.honorario_escritorio || 0)}</div>
+                            </td>
+                            <td class="text-end">
+                                <button class="btn btn-sm btn-outline-secondary" type="button" onclick="imprimirProcesso(${processo.id})">Imprimir</button>
+                            </td>
+                        </tr>
+                    `).join('')
+                    : '<tr><td colspan="5"><div class="empty-state mb-0">Nenhum processo vinculado a este cliente.</div></td></tr>';
+
+                historicoClienteModal.show();
+            } catch (error) {
+                alert(error.message);
+            }
+        }
+
+        function montarConteudoImpressao(processo) {
+            const janela = window.open('', '_blank', 'width=900,height=700');
+
+            if (!janela) {
+                alert('Permita pop-ups para imprimir o processo.');
+                return null;
+            }
+
+            const andamentos = Array.isArray(processo.andamentos) ? processo.andamentos : [];
+            const andamentosHtml = andamentos.length
+                ? andamentos.map((item) => `
+                    <tr>
+                        <td>${App.escapeHtml(App.formatDate(item.created_at))}</td>
+                        <td>${App.escapeHtml(String(item.andamento_percentual || 0))}%</td>
+                        <td>${App.escapeHtml(item.andamento_descricao || '-')}</td>
+                        <td>${App.escapeHtml(item.observacao || '-')}</td>
+                        <td>${App.formatCurrency(item.custo_extra || 0)}</td>
+                    </tr>
+                `).join('')
+                : '<tr><td colspan="5">Nenhum andamento registrado.</td></tr>';
+
+            janela.document.write(`
+                <!DOCTYPE html>
+                <html lang="pt-BR">
+                <head>
+                    <meta charset="UTF-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <title>Processo ${App.escapeHtml(processo.numero_processo || '')}</title>
+                    <style>
+                        * { box-sizing: border-box; }
+                        body {
+                            margin: 0;
+                            padding: 24px;
+                            font-family: Arial, Helvetica, sans-serif;
+                            color: #1f2937;
+                            background: #f3f6fa;
+                        }
+                        .sheet {
+                            max-width: 960px;
+                            margin: 0 auto;
+                            padding: 28px;
+                            background: #fff;
+                            border: 1px solid #dbe3ee;
+                            border-radius: 18px;
+                            box-shadow: 0 18px 60px rgba(15, 23, 42, 0.08);
+                        }
+                        .header {
+                            display: flex;
+                            justify-content: space-between;
+                            gap: 16px;
+                            align-items: flex-start;
+                            padding-bottom: 18px;
+                            margin-bottom: 22px;
+                            border-bottom: 1px solid #e5ecf5;
+                        }
+                        .brand {
+                            font-size: 14px;
+                            text-transform: uppercase;
+                            letter-spacing: 0.08em;
+                            color: #64748b;
+                            font-weight: 700;
+                        }
+                        h1 {
+                            margin: 6px 0 8px;
+                            font-size: 24px;
+                            color: #0f172a;
+                        }
+                        .meta, .small {
+                            color: #64748b;
+                            font-size: 13px;
+                            line-height: 1.6;
+                        }
+                        .pill {
+                            display: inline-flex;
+                            align-items: center;
+                            padding: 8px 12px;
+                            border-radius: 999px;
+                            background: #eef5fb;
+                            color: #1f4f78;
+                            font-size: 12px;
+                            font-weight: 700;
+                        }
+                        .grid {
+                            display: grid;
+                            grid-template-columns: repeat(2, minmax(0, 1fr));
+                            gap: 14px;
+                            margin-bottom: 18px;
+                        }
+                        .card {
+                            background: #f8fbff;
+                            border: 1px solid #dbe3ee;
+                            border-radius: 14px;
+                            padding: 14px;
+                        }
+                        .label {
+                            display: block;
+                            margin-bottom: 6px;
+                            color: #64748b;
+                            font-size: 11px;
+                            text-transform: uppercase;
+                            letter-spacing: 0.06em;
+                            font-weight: 700;
+                        }
+                        .value {
+                            font-size: 15px;
+                            font-weight: 700;
+                            color: #0f172a;
+                        }
+                        .section {
+                            margin-top: 18px;
+                            padding-top: 18px;
+                            border-top: 1px solid #e5ecf5;
+                        }
+                        .section h2 {
+                            margin: 0 0 12px;
+                            font-size: 16px;
+                            color: #0f172a;
+                        }
+                        .text {
+                            font-size: 14px;
+                            line-height: 1.7;
+                            color: #334155;
+                            white-space: pre-wrap;
+                        }
+                        .details {
+                            display: grid;
+                            grid-template-columns: repeat(2, minmax(0, 1fr));
+                            gap: 12px;
+                        }
+                        .detail {
+                            background: #fff;
+                            border: 1px solid #dbe3ee;
+                            border-radius: 12px;
+                            padding: 12px;
+                        }
+                        table {
+                            width: 100%;
+                            border-collapse: collapse;
+                            font-size: 13px;
+                        }
+                        th, td {
+                            text-align: left;
+                            padding: 10px 8px;
+                            border-bottom: 1px solid #e5ecf5;
+                            vertical-align: top;
+                        }
+                        th {
+                            color: #475569;
+                            font-size: 11px;
+                            text-transform: uppercase;
+                            letter-spacing: 0.06em;
+                        }
+                        .footer {
+                            margin-top: 28px;
+                            display: flex;
+                            justify-content: space-between;
+                            gap: 16px;
+                            align-items: center;
+                            color: #64748b;
+                            font-size: 12px;
+                            border-top: 1px solid #e5ecf5;
+                            padding-top: 14px;
+                        }
+                        @media print {
+                            body { background: #fff; padding: 0; }
+                            .sheet { box-shadow: none; border: 0; border-radius: 0; }
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="sheet">
+                        <div class="header">
+                            <div>
+                                <div class="brand">Painel do Escritório</div>
+                                <h1>Processo ${App.escapeHtml(processo.numero_processo || '-')}</h1>
+                                <div class="meta">
+                                    Cliente: ${App.escapeHtml(processo.cliente || '-')}<br>
+                                    Tipo: ${App.escapeHtml(processo.tipo || '-')}<br>
+                                    Data de abertura: ${App.escapeHtml(processo.data_abertura ? App.formatDate(processo.data_abertura) : '-')}
+                                </div>
+                            </div>
+                            <div class="pill">${App.escapeHtml(processo.status || 'Sem status')}</div>
+                        </div>
+
+                        <div class="grid">
+                            <div class="card">
+                                <span class="label">Andamento</span>
+                                <div class="value">${App.escapeHtml(String(processo.andamento_percentual || 0))}%</div>
+                                <div class="meta">${App.escapeHtml(processo.andamento_descricao || 'Sem descrição de andamento')}</div>
+                            </div>
+                            <div class="card">
+                                <span class="label">Honorário do escritório</span>
+                                <div class="value">${App.formatCurrency(processo.honorario_escritorio || 0)}</div>
+                            </div>
+                            <div class="card">
+                                <span class="label">Custo do processo</span>
+                                <div class="value">${App.formatCurrency(processo.custo_processo || 0)}</div>
+                            </div>
+                            <div class="card">
+                                <span class="label">Responsável</span>
+                                <div class="value">${App.escapeHtml(document.getElementById('usuarioNome')?.textContent || '-')}</div>
+                                <div class="meta">${App.escapeHtml(document.getElementById('empresaNome')?.textContent || '')}</div>
+                            </div>
+                        </div>
+
+                        <div class="section">
+                            <h2>Dados do cliente</h2>
+                            <div class="details">
+                                <div class="detail">
+                                    <span class="label">Nome</span>
+                                    <div class="value">${App.escapeHtml(processo.cliente || '-')}</div>
+                                </div>
+                                <div class="detail">
+                                    <span class="label">CPF/CNPJ</span>
+                                    <div class="value">${App.escapeHtml(processo.cliente_cpf || '-')}</div>
+                                </div>
+                                <div class="detail">
+                                    <span class="label">Telefone</span>
+                                    <div class="value">${App.escapeHtml(processo.cliente_telefone || '-')}</div>
+                                </div>
+                                <div class="detail">
+                                    <span class="label">E-mail</span>
+                                    <div class="value">${App.escapeHtml(processo.cliente_email || '-')}</div>
+                                </div>
+                                <div class="detail" style="grid-column: 1 / -1;">
+                                    <span class="label">Endereço</span>
+                                    <div class="value">${App.escapeHtml(processo.cliente_endereco || '-')}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="section">
+                            <h2>Dados completos do processo</h2>
+                            <div class="details">
+                                <div class="detail">
+                                    <span class="label">Número do processo</span>
+                                    <div class="value">${App.escapeHtml(processo.numero_processo || '-')}</div>
+                                </div>
+                                <div class="detail">
+                                    <span class="label">Tipo</span>
+                                    <div class="value">${App.escapeHtml(processo.tipo || '-')}</div>
+                                </div>
+                                <div class="detail">
+                                    <span class="label">Status</span>
+                                    <div class="value">${App.escapeHtml(processo.status || '-')}</div>
+                                </div>
+                                <div class="detail">
+                                    <span class="label">Data de abertura</span>
+                                    <div class="value">${App.escapeHtml(processo.data_abertura ? App.formatDate(processo.data_abertura) : '-')}</div>
+                                </div>
+                                <div class="detail">
+                                    <span class="label">Última movimentação</span>
+                                    <div class="value">${App.escapeHtml(processo.data_ultima_movimentacao ? App.formatDate(processo.data_ultima_movimentacao) : '-')}</div>
+                                </div>
+                                <div class="detail">
+                                    <span class="label">ID interno</span>
+                                    <div class="value">${App.escapeHtml(String(processo.id || '-'))}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="section">
+                            <h2>Descrição</h2>
+                            <div class="text">${App.escapeHtml(processo.descricao || 'Sem descrição cadastrada.')}</div>
+                        </div>
+
+                        <div class="section">
+                            <h2>Histórico de andamentos</h2>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Data</th>
+                                        <th>%</th>
+                                        <th>Etapa</th>
+                                        <th>Observação</th>
+                                        <th>Custo extra</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${andamentosHtml}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="footer">
+                            <div>Impresso em ${new Date().toLocaleDateString('pt-BR')}</div>
+                            <div>${App.escapeHtml(processo.numero_processo || '')}</div>
+                        </div>
+                    </div>
+                </body>
+                </html>
+            `);
+
+            janela.document.close();
+            return janela;
+        }
+
+        function imprimirHistoricoCliente() {
+            if (!clienteHistoricoAtual) {
+                alert('Abra um cliente no histórico antes de imprimir.');
+                return;
+            }
+
+            const processos = Array.isArray(processosHistoricoAtual) ? processosHistoricoAtual : [];
+            const janela = window.open('', '_blank', 'width=1000,height=750');
+
+            if (!janela) {
+                alert('Permita pop-ups para imprimir o histórico.');
+                return;
+            }
+
+            const linhas = processos.length
+                ? processos.map((processo) => `
+                    <tr>
+                        <td>${App.escapeHtml(processo.numero_processo || '-')}</td>
+                        <td>${App.escapeHtml(processo.status || '-')}</td>
+                        <td>${App.escapeHtml(String(processo.andamento_percentual || 0))}%</td>
+                        <td>${App.formatCurrency(processo.custo_processo || 0)}</td>
+                        <td>${App.formatCurrency(processo.honorario_escritorio || 0)}</td>
+                    </tr>
+                `).join('')
+                : '<tr><td colspan="5">Nenhum processo vinculado.</td></tr>';
+
+            janela.document.write(`
+                <!DOCTYPE html>
+                <html lang="pt-BR">
+                <head>
+                    <meta charset="UTF-8">
+                    <title>Histórico do cliente</title>
+                    <style>
+                        body { font-family: Arial, Helvetica, sans-serif; margin: 0; padding: 24px; color: #1f2937; }
+                        .sheet { max-width: 980px; margin: 0 auto; }
+                        h1, h2 { margin: 0 0 12px; }
+                        .muted { color: #64748b; font-size: 13px; }
+                        .block { border: 1px solid #dbe3ee; border-radius: 12px; padding: 14px; margin-bottom: 16px; }
+                        table { width: 100%; border-collapse: collapse; }
+                        th, td { text-align: left; border-bottom: 1px solid #e5ecf5; padding: 10px 8px; font-size: 13px; }
+                        th { text-transform: uppercase; letter-spacing: .06em; font-size: 11px; color: #475569; }
+                    </style>
+                </head>
+                <body>
+                    <div class="sheet">
+                        <h1>${App.escapeHtml(clienteHistoricoAtual.nome || 'Cliente')}</h1>
+                        <div class="muted">Documento: ${App.escapeHtml(clienteHistoricoAtual.documento || clienteHistoricoAtual.cpf || '-')} | Telefone: ${App.escapeHtml(clienteHistoricoAtual.telefone || '-')} | WhatsApp: ${App.escapeHtml(clienteHistoricoAtual.whatsapp || '-')}</div>
+                        <div class="block">
+                            <h2>Dados do cliente</h2>
+                            <div class="muted">E-mail: ${App.escapeHtml(clienteHistoricoAtual.email || '-')}</div>
+                            <div class="muted">Endereço: ${App.escapeHtml(clienteHistoricoAtual.endereco || '-')}</div>
+                        </div>
+                        <div class="block">
+                            <h2>Processos vinculados</h2>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Número</th>
+                                        <th>Status</th>
+                                        <th>Andamento</th>
+                                        <th>Custo</th>
+                                        <th>Honorário</th>
+                                    </tr>
+                                </thead>
+                                <tbody>${linhas}</tbody>
+                            </table>
+                        </div>
+                    </div>
+                </body>
+                </html>
+            `);
+
+            janela.document.close();
+            setTimeout(() => {
+                janela.focus();
+                janela.print();
+            }, 250);
+        }
+
+        async function imprimirProcesso(id) {
+            try {
+                const [processoResp, andamentosResp] = await Promise.all([
+                    App.apiFetch(`/processos/${id}`),
+                    App.apiFetch(`/processos/${id}/andamentos`)
+                ]);
+
+                const processo = await processoResp.json();
+                processo.andamentos = await andamentosResp.json();
+                const janela = montarConteudoImpressao(processo);
+                if (!janela) {
+                    return;
                 }
-            })
 
-            const clientes = await resposta.json()
-
-            let html = ""
-
-            clientes.forEach(c => {
-
-                html += `
-<tr>
-<td>${c.nome}</td>
-<td>${c.cpf}</td>
-<td>${c.telefone}</td>
-<td>${c.email}</td>
-</tr>
-`
-
-            })
-
-            document.getElementById("listaClientes").innerHTML = html
-
+                setTimeout(() => {
+                    janela.focus();
+                    janela.print();
+                }, 250);
+            } catch (error) {
+                alert(error.message);
+            }
         }
 
-        listarClientes()
+        async function excluirCliente(id) {
+            const cliente = clientesCache.find((item) => String(item.id) === String(id));
+            if (!confirm(`Deseja excluir ${cliente ? cliente.nome : 'este cliente'}?`)) {
+                return;
+            }
 
-        //mostrar uuario logado
-        if (!token) {
-            window.location.href = "/login.html"
+            try {
+                const response = await App.apiFetch(`/clientes/${id}`, { method: 'DELETE' });
+                const data = await response.json();
+                if (!response.ok) {
+                    throw new Error(data.msg || 'Erro ao excluir cliente');
+                }
+
+                await carregarClientes();
+            } catch (error) {
+                alert(error.message);
+            }
         }
 
-            // decodificar token
-        const payload = JSON.parse(atob(token.split('.')[1]))
+        window.abrirEdicao = abrirEdicao;
+        window.abrirHistorico = abrirHistorico;
+        window.imprimirHistoricoCliente = imprimirHistoricoCliente;
+        window.imprimirProcesso = imprimirProcesso;
+        window.excluirCliente = excluirCliente;
 
-        document.getElementById("usuarioLogado").innerText = payload.nome
-        
-        //botão voltar
-        function voltar() {
-                window.location.href = "/admin.html"
+        btnNovoCliente.addEventListener('click', () => {
+            limparFormCliente();
+            clienteModal.show();
+        });
+
+        btnLimparFiltro.addEventListener('click', () => {
+            filtroCliente.value = '';
+            renderizarTabela();
+        });
+
+        filtroCliente.addEventListener('input', renderizarTabela);
+        btnImprimirHistoricoCliente.addEventListener('click', imprimirHistoricoCliente);
+
+        formClienteModal.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            msgClienteModal.textContent = '';
+
+            const id = clienteModalId.value;
+            const payload = {
+                nome: campoNome.value.trim(),
+                documento: campoCpf.value.trim(),
+                telefone: campoTelefone.value.trim(),
+                whatsapp: campoWhatsapp.value.trim(),
+                email: campoEmail.value.trim(),
+                endereco: campoEndereco.value.trim()
+            };
+
+            try {
+                const response = await App.apiFetch(id ? `/clientes/${id}` : '/clientes', {
+                    method: id ? 'PUT' : 'POST',
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await response.json();
+                if (!response.ok) {
+                    throw new Error(data.msg || 'Erro ao salvar cliente');
+                }
+
+                msgClienteModal.textContent = data.msg;
+                msgClienteModal.className = 'small text-success';
+                await carregarClientes();
+                clienteModal.hide();
+            } catch (error) {
+                msgClienteModal.textContent = error.message;
+                msgClienteModal.className = 'small text-danger';
             }
+        });
 
-        //sair
-        function logout() {
-
-                localStorage.removeItem("token")
-
-                window.location.href = "/index.html"
-
-            }
-
-
+        (async () => {
+            await carregarClientes();
+        })();
     </script>
-
 </body>
 
 </html>

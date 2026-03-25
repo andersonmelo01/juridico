@@ -22,9 +22,11 @@ module.exports = (req, res, next) => {
 
     try {
 
-        const decoded = jwt.verify(token, "segredo");
+        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'segredo');
 
+        req.user = decoded;
         req.userId = decoded.id;
+        req.empresaId = decoded.empresaId;
 
         return next();
 

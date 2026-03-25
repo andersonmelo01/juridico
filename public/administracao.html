@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Administração | Plataforma</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/app.css">
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg app-navbar">
+    <div class="container py-2">
+      <a class="navbar-brand d-flex align-items-center gap-3" href="/administracao.html">
+        <span class="brand-mark">⚖</span>
+        <span class="fw-semibold">Administração da Plataforma</span>
+      </a>
+      <div class="ms-auto d-flex align-items-center gap-2">
+        <span class="nav-pill">Admin: <strong id="adminNome">-</strong></span>
+        <button class="btn btn-outline-dark btn-sm" onclick="App.logout('/login.html')">Sair</button>
+      </div>
+    </div>
+  </nav>
+
+  <main class="page-wrap container py-4 py-lg-5">
+    <section class="page-hero mb-4">
+      <div class="row align-items-center g-4">
+        <div class="col-lg-8">
+          <span class="eyebrow">Governança da plataforma</span>
+          <h1 class="display-title mt-3 mb-3">Aprovação centralizada, planos e gestão completa dos escritórios.</h1>
+          <p class="lead-copy mb-0">Valide pré-cadastros, gerencie planos e mantenha a base da plataforma organizada.</p>
+        </div>
+        <div class="col-lg-4">
+          <div class="glass-card">
+            <div class="row g-3">
+              <div class="col-6">
+                <div class="metric-card h-100">
+                  <div class="metric-label">Pendentes</div>
+                  <div class="metric-value" id="qtdPendentes">0</div>
+                  <div class="metric-note">aguardando validação</div>
+                </div>
+              </div>
+              <div class="col-6">
+                <div class="metric-card h-100">
+                  <div class="metric-label">Planos ativos</div>
+                  <div class="metric-value" id="qtdPlanos">0</div>
+                  <div class="metric-note">disponíveis</div>
+                </div>
+              </div>
+              <div class="col-12">
+                <div class="metric-card">
+                  <div class="metric-label">Aprovados</div>
+                  <div class="metric-value" id="qtdAprovados">0</div>
+                  <div class="metric-note">liberados para operação</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="action-grid mb-4">
+      <button type="button" class="action-card text-start btn btn-link text-decoration-none" onclick="irPara('secPendentes')">
+        <div class="icon">01</div>
+        <h3 class="h5 fw-bold">Pré-cadastros</h3>
+        <p class="mb-0">Aprovar ou bloquear escritórios.</p>
+      </button>
+      <button type="button" class="action-card text-start btn btn-link text-decoration-none" onclick="irPara('secPlanos')">
+        <div class="icon">02</div>
+        <h3 class="h5 fw-bold">Planos</h3>
+        <p class="mb-0">Criar pacotes comerciais.</p>
+      </button>
+      <button type="button" class="action-card text-start btn btn-link text-decoration-none" onclick="irPara('secEscritorios')">
+        <div class="icon">03</div>
+        <h3 class="h5 fw-bold">Escritórios</h3>
+        <p class="mb-0">Listagem com modal de cadastro.</p>
+      </button>
+    </section>
+
+    <section class="surface-card mb-4" id="secPendentes">
+      <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <div>
+          <h2 class="section-title mb-0">Pré-cadastros</h2>
+          <p class="card-text-muted mb-0">Aprovação em uma única linha com seleção de plano.</p>
+        </div>
+        <span class="badge-soft" id="qtdAprovadosResumo">0 aprovados</span>
+      </div>
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-modern align-middle mb-0">
+            <thead>
+              <tr>
+                <th>Escritório</th>
+                <th>CNPJ</th>
+                <th>Plano solicitado</th>
+                <th>Contato</th>
+                <th>Criado em</th>
+                <th>Ação</th>
+              </tr>
+            </thead>
+            <tbody id="listaPendentes"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section class="form-shell mb-4" id="secPlanos">
+      <div class="surface-card">
+        <div class="card-header">
+          <h2 class="section-title mb-0">Criar plano</h2>
+          <p class="card-text-muted mb-0">Cadastre pacotes comerciais para os escritórios.</p>
+        </div>
+        <div class="card-body">
+          <form id="formPlano">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="app-label" for="planoNome">Nome</label>
+                <input id="planoNome" class="form-control" required>
+              </div>
+              <div class="col-md-6">
+                <label class="app-label" for="planoPreco">Preço mensal</label>
+                <input id="planoPreco" type="number" step="0.01" min="0" class="form-control" required>
+              </div>
+              <div class="col-12">
+                <label class="app-label" for="planoDescricao">Descrição</label>
+                <input id="planoDescricao" class="form-control">
+              </div>
+              <div class="col-md-4">
+                <label class="app-label" for="planoUsuarios">Limite usuários</label>
+                <input id="planoUsuarios" type="number" min="0" class="form-control" value="1">
+              </div>
+              <div class="col-md-4">
+                <label class="app-label" for="planoClientes">Limite clientes</label>
+                <input id="planoClientes" type="number" min="0" class="form-control" value="0">
+              </div>
+              <div class="col-md-4">
+                <label class="app-label" for="planoProcessos">Limite processos</label>
+                <input id="planoProcessos" type="number" min="0" class="form-control" value="0">
+              </div>
+            </div>
+            <div class="d-flex align-items-center gap-3 mt-4 flex-wrap">
+              <button class="btn btn-primary" type="submit">Salvar plano</button>
+              <div id="msgPlano" class="small"></div>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <div class="surface-card">
+        <div class="card-header">
+          <h2 class="section-title mb-0">Planos cadastrados</h2>
+          <p class="card-text-muted mb-0">Lista comercial disponível para vínculo.</p>
+        </div>
+        <div class="card-body">
+          <div id="listaPlanos" class="action-grid"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="surface-card" id="secEscritorios">
+      <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <div>
+          <h2 class="section-title mb-0">Escritórios</h2>
+          <p class="card-text-muted mb-0">A listagem fica na tela. O cadastro e a edição abrem em modal.</p>
+        </div>
+        <div class="d-flex gap-2 align-items-center">
+          <span class="badge-soft" id="qtdEscritorios">0 escritórios</span>
+          <button class="btn btn-primary btn-sm" type="button" id="btnNovoEscritorio">Cadastrar escritório</button>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-modern align-middle mb-0">
+            <thead>
+              <tr>
+                <th>Escritório</th>
+                <th>Status</th>
+                <th>Administrador</th>
+                <th>Plano</th>
+                <th>Licença</th>
+                <th>Usuários</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="listaEscritorios"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div class="modal fade" id="escritorioModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+      <div class="modal-content border-0 shadow">
+        <div class="modal-header modal-header-soft">
+          <div>
+            <div class="text-uppercase text-muted small fw-semibold" id="modalSubtitulo">Cadastro de escritório</div>
+            <h5 class="modal-title mb-0" id="modalTitulo">Cadastrar escritório</h5>
+          </div>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+        </div>
+        <div class="modal-body p-0">
+          <form id="formEscritorioModal" class="p-3 p-md-4">
+            <input type="hidden" id="editarId">
+            <div class="row g-4">
+              <div class="col-lg-8">
+                <div class="surface-card shadow-none border h-100">
+                  <div class="card-header">
+                    <h6 class="mb-0">Dados do escritório</h6>
+                  </div>
+                  <div class="card-body">
+                    <div class="row g-3">
+                      <div class="col-12">
+                        <label class="app-label" for="escritorioNome">Nome</label>
+                        <input id="escritorioNome" class="form-control" required>
+                      </div>
+                      <div class="col-md-6">
+                        <label class="app-label" for="escritorioCnpj">CNPJ</label>
+                        <input id="escritorioCnpj" class="form-control" required>
+                      </div>
+                      <div class="col-md-6">
+                        <label class="app-label" for="escritorioPlano">Plano</label>
+                        <select id="escritorioPlano" class="form-select">
+                          <option value="">Selecione</option>
+                        </select>
+                      </div>
+                      <div class="col-md-6">
+                        <label class="app-label" for="escritorioEmail">E-mail</label>
+                        <input id="escritorioEmail" type="email" class="form-control">
+                      </div>
+                      <div class="col-md-6">
+                        <label class="app-label" for="escritorioTelefone">Telefone</label>
+                        <input id="escritorioTelefone" class="form-control">
+                      </div>
+                      <div class="col-md-6">
+                        <label class="app-label" for="escritorioStatus">Status do escritório</label>
+                        <select id="escritorioStatus" class="form-select">
+                          <option value="aprovada">Aprovada</option>
+                          <option value="pendente">Pendente</option>
+                          <option value="bloqueada">Bloqueada</option>
+                        </select>
+                      </div>
+                      <div class="col-md-6">
+                        <label class="app-label" for="escritorioLicencaStatus">Status da licença</label>
+                        <select id="escritorioLicencaStatus" class="form-select">
+                          <option value="ativa">Ativa</option>
+                          <option value="vencida">Vencida</option>
+                          <option value="suspensa">Suspensa</option>
+                        </select>
+                      </div>
+                      <div class="col-md-6">
+                        <label class="app-label" for="escritorioLicencaInicio">Início da licença</label>
+                        <input id="escritorioLicencaInicio" type="date" class="form-control">
+                      </div>
+                      <div class="col-md-6">
+                        <label class="app-label" for="escritorioLicencaFim">Fim da licença</label>
+                        <input id="escritorioLicencaFim" type="date" class="form-control">
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-lg-4">
+                <div class="surface-card shadow-none border h-100">
+                  <div class="card-header">
+                    <h6 class="mb-0">Administrador inicial</h6>
+                  </div>
+                  <div class="card-body">
+                    <p class="small text-muted mb-3" id="modalAjuda">Preencha estes dados apenas no cadastro novo.</p>
+                    <div class="mb-3">
+                      <label class="app-label" for="escritorioAdminNome">Nome</label>
+                      <input id="escritorioAdminNome" class="form-control">
+                    </div>
+                    <div class="mb-3">
+                      <label class="app-label" for="escritorioAdminEmail">E-mail</label>
+                      <input id="escritorioAdminEmail" type="email" class="form-control">
+                    </div>
+                    <div class="mb-0">
+                      <label class="app-label" for="escritorioAdminSenha">Senha</label>
+                      <input id="escritorioAdminSenha" type="password" class="form-control">
+                    </div>
+                    <div class="mt-4 p-3 rounded-3 bg-light border small text-muted">
+                      No modo de edição, estes campos ficam opcionais.
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-12" id="secaoNovoUsuario" style="display:none;">
+                <div class="surface-card shadow-none border">
+                  <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <div>
+                      <h6 class="mb-0" id="tituloUsuarioFormulario">Adicionar usuário ao escritório</h6>
+                      <p class="small text-muted mb-0" id="textoUsuarioFormulario">Use este bloco para criar usuários internos quando estiver editando um escritório existente.</p>
+                    </div>
+                    <span class="badge-soft">admin, secretaria, estagiário</span>
+                  </div>
+                  <div class="card-body">
+                    <div class="row g-3">
+                      <input type="hidden" id="usuarioEdicaoId">
+                      <div class="col-md-4">
+                        <label class="app-label" for="novoUsuarioNome">Nome</label>
+                        <input id="novoUsuarioNome" class="form-control" placeholder="Nome do usuário">
+                      </div>
+                      <div class="col-md-4">
+                        <label class="app-label" for="novoUsuarioEmail">E-mail</label>
+                        <input id="novoUsuarioEmail" type="email" class="form-control" placeholder="usuario@empresa.com">
+                      </div>
+                      <div class="col-md-2">
+                        <label class="app-label" for="novoUsuarioPerfil">Perfil</label>
+                        <select id="novoUsuarioPerfil" class="form-select">
+                          <option value="admin">Admin</option>
+                          <option value="secretaria">Secretaria</option>
+                          <option value="estagiario">Estagiário</option>
+                        </select>
+                      </div>
+                      <div class="col-md-2">
+                        <label class="app-label" for="novoUsuarioSenha">Senha</label>
+                        <input id="novoUsuarioSenha" type="password" class="form-control" placeholder="Senha">
+                      </div>
+                    </div>
+                    <div class="d-flex align-items-center justify-content-between gap-3 mt-3 flex-wrap">
+                      <div id="msgNovoUsuario" class="small"></div>
+                      <div class="d-flex gap-2">
+                        <button class="btn btn-outline-dark" type="button" id="btnCancelarEdicaoUsuario" style="display:none;">Cancelar edição</button>
+                        <button class="btn btn-outline-dark" type="button" id="btnAdicionarUsuario">Adicionar usuário</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-12" id="secaoListaUsuarios" style="display:none;">
+                <div class="surface-card shadow-none border">
+                  <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <div>
+                      <h6 class="mb-0">Usuários cadastrados</h6>
+                      <p class="small text-muted mb-0">Lista completa dos usuários vinculados ao escritório selecionado.</p>
+                    </div>
+                    <span class="badge-soft" id="badgeUsuariosEmpresa">0 usuários</span>
+                  </div>
+                  <div class="card-body">
+                    <div class="table-responsive">
+                      <table class="table table-modern align-middle mb-0">
+                        <thead>
+                          <tr>
+                            <th>Nome</th>
+                            <th>E-mail</th>
+                            <th>Perfil</th>
+                            <th>Criado em</th>
+                            <th></th>
+                          </tr>
+                        </thead>
+                        <tbody id="listaUsuariosEmpresa"></tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="d-flex align-items-center justify-content-between gap-3 mt-4 flex-wrap">
+              <div id="msgModal" class="small"></div>
+              <div class="d-flex gap-2">
+                <button class="btn btn-primary" type="submit" id="btnSalvarModal">Salvar</button>
+                <button class="btn btn-outline-dark" type="button" data-bs-dismiss="modal">Cancelar</button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/app.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    const auth = App.requireAuth('/login.html');
+    if (!auth || auth.user.role !== 'platform_admin') {
+      window.location.href = '/admin.html';
+    }
+
+    document.getElementById('adminNome').textContent = auth.user.nome || 'Administrador';
+
+    const listaPendentes = document.getElementById('listaPendentes');
+    const listaPlanos = document.getElementById('listaPlanos');
+    const msgPlano = document.getElementById('msgPlano');
+    const badgeEscritorios = document.getElementById('qtdEscritorios');
+    const tabelaEscritorios = document.getElementById('listaEscritorios');
+    const msgModal = document.getElementById('msgModal');
+    const msgNovoUsuario = document.getElementById('msgNovoUsuario');
+    const formModal = document.getElementById('formEscritorioModal');
+    const modalTitulo = document.getElementById('modalTitulo');
+    const modalEl = document.getElementById('escritorioModal');
+    const modal = new bootstrap.Modal(modalEl);
+    const btnNovo = document.getElementById('btnNovoEscritorio');
+    const editarId = document.getElementById('editarId');
+    const secaoNovoUsuario = document.getElementById('secaoNovoUsuario');
+    const secaoListaUsuarios = document.getElementById('secaoListaUsuarios');
+    const btnAdicionarUsuario = document.getElementById('btnAdicionarUsuario');
+    const btnCancelarEdicaoUsuario = document.getElementById('btnCancelarEdicaoUsuario');
+    const listaUsuariosEmpresa = document.getElementById('listaUsuariosEmpresa');
+    const badgeUsuariosEmpresa = document.getElementById('badgeUsuariosEmpresa');
+    const tituloUsuarioFormulario = document.getElementById('tituloUsuarioFormulario');
+    const textoUsuarioFormulario = document.getElementById('textoUsuarioFormulario');
+    const usuarioEdicaoId = document.getElementById('usuarioEdicaoId');
+
+    let planosCache = [];
+    let empresasCache = [];
+    let usuariosCache = [];
+
+    function irPara(id) {
+      document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function limparModal() {
+      formModal.reset();
+      editarId.value = '';
+      msgModal.textContent = '';
+      msgNovoUsuario.textContent = '';
+      usuarioEdicaoId.value = '';
+      modalTitulo.textContent = 'Cadastrar escritório';
+      document.getElementById('btnSalvarModal').textContent = 'Salvar';
+      secaoNovoUsuario.style.display = 'none';
+      secaoListaUsuarios.style.display = 'none';
+      listaUsuariosEmpresa.innerHTML = '';
+      badgeUsuariosEmpresa.textContent = '0 usuários';
+      tituloUsuarioFormulario.textContent = 'Adicionar usuário ao escritório';
+      textoUsuarioFormulario.textContent = 'Use este bloco para criar usuários internos quando estiver editando um escritório existente.';
+      btnAdicionarUsuario.textContent = 'Adicionar usuário';
+      btnCancelarEdicaoUsuario.style.display = 'none';
+    }
+
+    function configurarCamposAdmin(obrigatorio) {
+      const nome = document.getElementById('escritorioAdminNome');
+      const email = document.getElementById('escritorioAdminEmail');
+      const senha = document.getElementById('escritorioAdminSenha');
+
+      [nome, email, senha].forEach((campo) => {
+        campo.required = !!obrigatorio;
+        campo.disabled = !obrigatorio;
+      });
+    }
+
+    function abrirNovoModal() {
+      limparModal();
+      document.getElementById('modalSubtitulo').textContent = 'Cadastro de escritório';
+      document.getElementById('modalAjuda').textContent = 'Preencha os dados do escritório e do administrador inicial.';
+      configurarCamposAdmin(true);
+      secaoNovoUsuario.style.display = 'none';
+      secaoListaUsuarios.style.display = 'none';
+      modal.show();
+    }
+
+    function abrirFormularioEdicao(empresa) {
+      limparModal();
+      editarId.value = empresa.id;
+      document.getElementById('modalSubtitulo').textContent = 'Edição de escritório';
+      modalTitulo.textContent = 'Editar escritório';
+      document.getElementById('btnSalvarModal').textContent = 'Salvar alterações';
+      document.getElementById('modalAjuda').textContent = 'Na edição, os dados do administrador inicial são opcionais.';
+      configurarCamposAdmin(false);
+      secaoNovoUsuario.style.display = 'block';
+      secaoListaUsuarios.style.display = 'block';
+      document.getElementById('escritorioNome').value = empresa.nome || '';
+      document.getElementById('escritorioCnpj').value = empresa.cnpj || '';
+      document.getElementById('escritorioEmail').value = empresa.email || '';
+      document.getElementById('escritorioTelefone').value = empresa.telefone || '';
+      document.getElementById('escritorioPlano').value = empresa.plano_id || '';
+      document.getElementById('escritorioStatus').value = empresa.status || 'aprovada';
+      document.getElementById('escritorioLicencaInicio').value = empresa.licenca_inicio || '';
+      document.getElementById('escritorioLicencaFim').value = empresa.licenca_fim || '';
+      document.getElementById('escritorioLicencaStatus').value = empresa.licenca_status || 'ativa';
+      document.getElementById('escritorioAdminNome').value = empresa.admin_nome || '';
+      document.getElementById('escritorioAdminEmail').value = empresa.admin_email || '';
+      document.getElementById('escritorioAdminSenha').value = '';
+      modal.show();
+      carregarUsuariosEmpresa(empresa.id);
+    }
+
+    function renderizarUsuarios(usuarios) {
+      badgeUsuariosEmpresa.textContent = `${usuarios.length} usuário${usuarios.length === 1 ? '' : 's'}`;
+
+      listaUsuariosEmpresa.innerHTML = usuarios.length
+        ? usuarios.map((usuario) => `
+          <tr>
+            <td class="fw-semibold">${App.escapeHtml(usuario.nome)}</td>
+            <td>${App.escapeHtml(usuario.email)}</td>
+            <td><span class="badge-soft">${App.escapeHtml(usuario.role)}</span></td>
+            <td class="small text-muted">${App.formatDate(usuario.created_at)}</td>
+            <td class="text-end">
+              <div class="d-flex gap-2 justify-content-end">
+                <button class="btn btn-sm btn-primary" type="button" onclick="editarUsuarioEmpresa(${usuario.id})">Editar</button>
+                <button class="btn btn-sm btn-outline-dark" type="button" onclick="excluirUsuarioEmpresa(${usuario.id})">Excluir</button>
+              </div>
+            </td>
+          </tr>
+        `).join('')
+        : '<tr><td colspan="5"><div class="empty-state mb-0">Nenhum usuário cadastrado neste escritório.</div></td></tr>';
+    }
+
+    async function carregarUsuariosEmpresa(empresaId) {
+      if (!empresaId) {
+        usuariosCache = [];
+        renderizarUsuarios([]);
+        return;
+      }
+
+      try {
+        const response = await App.apiFetch(`/admin/empresas/${empresaId}/usuarios`);
+        usuariosCache = await response.json();
+        renderizarUsuarios(usuariosCache);
+      } catch (error) {
+        listaUsuariosEmpresa.innerHTML = '<tr><td colspan="5"><div class="empty-state mb-0">Falha ao carregar usuários.</div></td></tr>';
+      }
+    }
+
+    function iniciarEdicaoUsuario(usuario) {
+      usuarioEdicaoId.value = usuario.id;
+      document.getElementById('novoUsuarioNome').value = usuario.nome || '';
+      document.getElementById('novoUsuarioEmail').value = usuario.email || '';
+      document.getElementById('novoUsuarioPerfil').value = usuario.role || 'admin';
+      document.getElementById('novoUsuarioSenha').value = '';
+      tituloUsuarioFormulario.textContent = 'Editar usuário do escritório';
+      textoUsuarioFormulario.textContent = 'Atualize os dados do usuário e clique em salvar alterações.';
+      btnAdicionarUsuario.textContent = 'Salvar alterações';
+      btnCancelarEdicaoUsuario.style.display = 'inline-flex';
+      msgNovoUsuario.textContent = `Editando ${usuario.nome}`;
+      msgNovoUsuario.className = 'small text-success';
+    }
+
+    function cancelarEdicaoUsuario() {
+      usuarioEdicaoId.value = '';
+      document.getElementById('novoUsuarioNome').value = '';
+      document.getElementById('novoUsuarioEmail').value = '';
+      document.getElementById('novoUsuarioPerfil').value = 'admin';
+      document.getElementById('novoUsuarioSenha').value = '';
+      tituloUsuarioFormulario.textContent = 'Adicionar usuário ao escritório';
+      textoUsuarioFormulario.textContent = 'Use este bloco para criar usuários internos quando estiver editando um escritório existente.';
+      btnAdicionarUsuario.textContent = 'Adicionar usuário';
+      btnCancelarEdicaoUsuario.style.display = 'none';
+      msgNovoUsuario.textContent = '';
+    }
+
+    window.editarUsuarioEmpresa = function (usuarioId) {
+      const usuario = usuariosCache.find((item) => String(item.id) === String(usuarioId));
+      if (!usuario) {
+        return;
+      }
+
+      iniciarEdicaoUsuario(usuario);
+    };
+
+    window.excluirUsuarioEmpresa = async function (usuarioId) {
+      const empresaId = editarId.value;
+      if (!empresaId) {
+        return;
+      }
+
+      const usuario = usuariosCache.find((item) => String(item.id) === String(usuarioId));
+      if (!confirm(`Deseja excluir o usuário ${usuario ? usuario.nome : ''}?`)) {
+        return;
+      }
+
+      try {
+        const response = await App.apiFetch(`/admin/empresas/${empresaId}/usuarios/${usuarioId}`, {
+          method: 'DELETE'
+        });
+        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(data.msg || 'Erro ao excluir usuário');
+        }
+
+        if (String(usuarioEdicaoId.value) === String(usuarioId)) {
+          cancelarEdicaoUsuario();
+        }
+
+        await carregarUsuariosEmpresa(empresaId);
+      } catch (error) {
+        alert(error.message);
+      }
+    };
+
+    async function carregarResumo() {
+      const response = await App.apiFetch('/admin/resumo');
+      const dados = await response.json();
+      document.getElementById('qtdPendentes').textContent = dados.pendentes || 0;
+      document.getElementById('qtdPlanos').textContent = dados.planos_ativos || 0;
+      document.getElementById('qtdAprovados').textContent = `${dados.aprovadas || 0}`;
+      document.getElementById('qtdAprovadosResumo').textContent = `${dados.aprovadas || 0} aprovados`;
+    }
+
+    async function carregarPlanos() {
+      const response = await App.apiFetch('/admin/planos');
+      planosCache = await response.json();
+      document.getElementById('qtdPlanos').textContent = planosCache.filter((plano) => Number(plano.ativo) === 1).length;
+      const selectOptions = ['<option value="">Selecione</option>']
+        .concat(planosCache.map((plano) => `<option value="${plano.id}">${App.escapeHtml(plano.nome)} - ${App.formatCurrency(plano.preco_mensal)}</option>`))
+        .join('');
+      document.getElementById('escritorioPlano').innerHTML = selectOptions;
+
+      listaPlanos.innerHTML = planosCache.length
+        ? planosCache.map((plano) => `
+          <article class="action-card">
+            <div class="d-flex justify-content-between align-items-start gap-3">
+              <div>
+                <div class="badge-soft mb-2">${App.escapeHtml(plano.nome)}</div>
+                <h5 class="mb-2">${App.formatCurrency(plano.preco_mensal)}</h5>
+              </div>
+              <span class="badge-soft">${plano.ativo ? 'Ativo' : 'Inativo'}</span>
+            </div>
+            <p class="mb-3">${App.escapeHtml(plano.descricao || 'Sem descrição')}</p>
+            <div class="small text-muted">
+              Usuários: ${plano.limite_usuarios} | Clientes: ${plano.limite_clientes} | Processos: ${plano.limite_processos}
+            </div>
+          </article>
+        `).join('')
+        : '<div class="empty-state">Nenhum plano cadastrado.</div>';
+    }
+
+    async function carregarEscritorios() {
+      const response = await App.apiFetch('/admin/empresas');
+      empresasCache = await response.json();
+      badgeEscritorios.textContent = `${empresasCache.length} escritórios`;
+      tabelaEscritorios.innerHTML = empresasCache.length
+        ? empresasCache.map((empresa) => `
+          <tr>
+            <td>
+              <div class="fw-semibold">${App.escapeHtml(empresa.nome)}</div>
+              <div class="small text-muted">${App.escapeHtml(empresa.cnpj || '-')}</div>
+            </td>
+            <td><span class="badge-soft">${App.escapeHtml(empresa.status || '-')}</span></td>
+            <td>
+              <div class="fw-semibold">${App.escapeHtml(empresa.admin_nome || '-')}</div>
+              <div class="small text-muted">${App.escapeHtml(empresa.admin_email || '-')}</div>
+            </td>
+            <td>
+              <div>${App.escapeHtml(empresa.plano_nome || '-')}</div>
+              <div class="small text-muted">${App.formatCurrency(empresa.preco_mensal || 0)}</div>
+            </td>
+            <td>
+              <div class="small">${App.escapeHtml(empresa.licenca_status || '-')}</div>
+              <div class="small text-muted">${empresa.licenca_fim ? `até ${App.formatDate(empresa.licenca_fim)}` : 'sem vencimento'}</div>
+            </td>
+            <td>${empresa.qtd_usuarios || 0}</td>
+            <td class="text-end">
+              <div class="d-flex gap-2 justify-content-end">
+                <button class="btn btn-sm btn-primary" type="button" onclick="abrirEdicaoModal(${empresa.id})">Editar</button>
+                <button class="btn btn-sm btn-outline-dark" type="button" onclick="removerEmpresa(${empresa.id})">Excluir</button>
+              </div>
+            </td>
+          </tr>
+        `).join('')
+        : '<tr><td colspan="7"><div class="empty-state mb-0">Nenhum escritório cadastrado.</div></td></tr>';
+    }
+
+    window.abrirEdicaoModal = async function (id) {
+      const empresa = empresasCache.find((item) => String(item.id) === String(id));
+      if (!empresa) {
+        return;
+      }
+      abrirFormularioEdicao(empresa);
+    };
+
+    window.removerEmpresa = async function (id) {
+      if (!confirm('Deseja excluir este escritório?')) {
+        return;
+      }
+      const response = await App.apiFetch(`/admin/empresas/${id}`, { method: 'DELETE' });
+      const data = await response.json();
+      if (!response.ok) {
+        alert(data.msg || 'Erro ao excluir escritório');
+        return;
+      }
+      await carregarTudo();
+    };
+
+    async function carregarPendentes() {
+      const response = await App.apiFetch('/admin/pre-cadastros');
+      const pendentes = await response.json();
+      listaPendentes.innerHTML = pendentes.length
+        ? pendentes.map((empresa) => `
+          <tr>
+            <td>
+              <div class="fw-semibold">${App.escapeHtml(empresa.nome)}</div>
+              <div class="small text-muted">${App.escapeHtml(empresa.status)}</div>
+            </td>
+            <td>${App.escapeHtml(empresa.cnpj)}</td>
+            <td>
+              <select class="form-select form-select-sm" id="plano-${empresa.id}">
+                <option value="">Selecione um plano</option>
+                ${planosCache.map((plano) => `<option value="${plano.id}">${App.escapeHtml(plano.nome)} - ${App.formatCurrency(plano.preco_mensal)}</option>`).join('')}
+              </select>
+              <div class="small text-muted mt-1">${App.escapeHtml(empresa.plano_nome || 'Sem plano selecionado')}</div>
+            </td>
+            <td>
+              <div>${App.escapeHtml(empresa.email || '-')}</div>
+              <div class="small text-muted">${App.escapeHtml(empresa.telefone || '-')}</div>
+            </td>
+            <td>${App.formatDate(empresa.created_at)}</td>
+            <td>
+              <div class="d-flex gap-2">
+                <button class="btn btn-sm btn-success" onclick="aprovarEmpresa(${empresa.id})">Aprovar</button>
+                <button class="btn btn-sm btn-outline-dark" onclick="rejeitarEmpresa(${empresa.id})">Bloquear</button>
+              </div>
+            </td>
+          </tr>
+        `).join('')
+        : `<tr><td colspan="6"><div class="empty-state mb-0">Nenhum escritório pendente.</div></td></tr>`;
+    }
+
+    window.aprovarEmpresa = async function (id) {
+      const seletor = document.getElementById(`plano-${id}`);
+      const planoId = seletor ? seletor.value : '';
+      if (!planoId) {
+        alert('Selecione um plano antes de aprovar.');
+        return;
+      }
+      const response = await App.apiFetch(`/admin/empresas/${id}/aprovar`, {
+        method: 'POST',
+        body: JSON.stringify({ plano_id: planoId })
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        alert(data.msg || 'Erro ao aprovar escritório');
+        return;
+      }
+      await carregarTudo();
+    };
+
+    window.rejeitarEmpresa = async function (id) {
+      if (!confirm('Deseja bloquear este escritório?')) {
+        return;
+      }
+      const response = await App.apiFetch(`/admin/empresas/${id}/rejeitar`, { method: 'POST' });
+      const data = await response.json();
+      if (!response.ok) {
+        alert(data.msg || 'Erro ao bloquear escritório');
+        return;
+      }
+      await carregarTudo();
+    };
+
+    document.getElementById('btnNovoEscritorio').addEventListener('click', abrirNovoModal);
+
+    document.getElementById('formPlano').addEventListener('submit', async (event) => {
+      event.preventDefault();
+      msgPlano.textContent = '';
+      try {
+        const response = await App.apiFetch('/admin/planos', {
+          method: 'POST',
+          body: JSON.stringify({
+            nome: document.getElementById('planoNome').value.trim(),
+            descricao: document.getElementById('planoDescricao').value.trim(),
+            preco_mensal: document.getElementById('planoPreco').value,
+            limite_usuarios: document.getElementById('planoUsuarios').value,
+            limite_clientes: document.getElementById('planoClientes').value,
+            limite_processos: document.getElementById('planoProcessos').value
+          })
+        });
+        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(data.msg || 'Erro ao criar plano');
+        }
+        msgPlano.textContent = data.msg;
+        msgPlano.className = 'small text-success';
+        event.target.reset();
+        await carregarTudo();
+      } catch (error) {
+        msgPlano.textContent = error.message;
+        msgPlano.className = 'small text-danger';
+      }
+    });
+
+    formModal.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      msgModal.textContent = '';
+
+      const empresaId = editarId.value;
+      const payload = {
+        nome: document.getElementById('escritorioNome').value.trim(),
+        cnpj: document.getElementById('escritorioCnpj').value.trim(),
+        email: document.getElementById('escritorioEmail').value.trim(),
+        telefone: document.getElementById('escritorioTelefone').value.trim(),
+        plano_id: document.getElementById('escritorioPlano').value,
+        status: document.getElementById('escritorioStatus').value,
+        licenca_inicio: document.getElementById('escritorioLicencaInicio').value,
+        licenca_fim: document.getElementById('escritorioLicencaFim').value,
+        licenca_status: document.getElementById('escritorioLicencaStatus').value
+      };
+
+      try {
+        let response;
+        if (empresaId) {
+          response = await App.apiFetch(`/admin/empresas/${empresaId}`, {
+            method: 'PUT',
+            body: JSON.stringify(payload)
+          });
+        } else {
+          const adminNome = document.getElementById('escritorioAdminNome').value.trim();
+          const adminEmail = document.getElementById('escritorioAdminEmail').value.trim();
+          const adminSenha = document.getElementById('escritorioAdminSenha').value;
+          if (!adminNome || !adminEmail || !adminSenha) {
+            throw new Error('Informe os dados do administrador inicial para criar o escritório');
+          }
+          response = await App.apiFetch('/admin/empresas', {
+            method: 'POST',
+            body: JSON.stringify({
+              empresa: payload,
+              admin: {
+                nome: adminNome,
+                email: adminEmail,
+                senha: adminSenha
+              },
+              licenca: {
+                inicio: document.getElementById('escritorioLicencaInicio').value,
+                fim: document.getElementById('escritorioLicencaFim').value,
+                status: document.getElementById('escritorioLicencaStatus').value
+              }
+            })
+          });
+        }
+
+        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(data.msg || 'Falha ao salvar escritório');
+        }
+
+        msgModal.textContent = data.adminId
+          ? `${data.msg}. Administrador inicial criado com sucesso.`
+          : data.msg;
+        msgModal.className = 'small text-success';
+        await carregarTudo();
+        modal.hide();
+      } catch (error) {
+        msgModal.textContent = error.message;
+        msgModal.className = 'small text-danger';
+      }
+    });
+
+    btnAdicionarUsuario.addEventListener('click', async () => {
+      const empresaId = editarId.value;
+      const usuarioId = usuarioEdicaoId.value;
+
+      if (!empresaId) {
+        msgNovoUsuario.textContent = 'Abra um escritório em modo de edição para adicionar o usuário.';
+        msgNovoUsuario.className = 'small text-danger';
+        return;
+      }
+
+      const nome = document.getElementById('novoUsuarioNome').value.trim();
+      const email = document.getElementById('novoUsuarioEmail').value.trim();
+      const senha = document.getElementById('novoUsuarioSenha').value;
+      const role = document.getElementById('novoUsuarioPerfil').value;
+
+      if (!nome || !email || !senha || !role) {
+        msgNovoUsuario.textContent = 'Preencha nome, e-mail, senha e perfil.';
+        msgNovoUsuario.className = 'small text-danger';
+        return;
+      }
+
+      msgNovoUsuario.textContent = '';
+
+      try {
+        const response = await App.apiFetch(
+          usuarioId ? `/admin/empresas/${empresaId}/usuarios/${usuarioId}` : `/admin/empresas/${empresaId}/usuarios`,
+          {
+            method: usuarioId ? 'PUT' : 'POST',
+            body: JSON.stringify({ nome, email, senha, role })
+          }
+        );
+
+        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(data.msg || 'Erro ao criar usuário');
+        }
+
+        msgNovoUsuario.textContent = data.msg;
+        msgNovoUsuario.className = 'small text-success';
+        cancelarEdicaoUsuario();
+        await carregarUsuariosEmpresa(empresaId);
+        await carregarEscritorios();
+      } catch (error) {
+        msgNovoUsuario.textContent = error.message;
+        msgNovoUsuario.className = 'small text-danger';
+      }
+    });
+
+    btnCancelarEdicaoUsuario.addEventListener('click', cancelarEdicaoUsuario);
+
+    async function carregarTudo() {
+      await carregarPlanos();
+      await carregarEscritorios();
+      await carregarPendentes();
+      await carregarResumo();
+    }
+
+    carregarTudo();
+  </script>
+</body>
+</html>

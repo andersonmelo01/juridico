@@ -1,18 +1,25 @@
+require('dotenv').config();
+
 const mysql = require('mysql2');
 
-const connection = mysql.createConnection({
-    host: 'localhost',
-    user: 'adv',
-    password: 'gigalele',
-    database: 'juridico'
+const pool = mysql.createPool({
+    host: process.env.DB_HOST || 'localhost',
+    user: process.env.DB_USER || 'root',
+    password: process.env.DB_PASSWORD || 'admin',
+    database: process.env.DB_NAME || 'sistema_multiempresa',
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0
 });
 
-connection.connect((err) => {
+pool.getConnection((err, connection) => {
     if (err) {
-        console.error("Erro ao conectar:", err);
-    } else {
-        console.log("MySQL conectado");
+        console.error('Erro ao conectar no MySQL:', err.message);
+        return;
     }
+
+    console.log('MySQL conectado');
+    connection.release();
 });
 
-module.exports = connection;
+module.exports = pool;

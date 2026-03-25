@@ -1,174 +1,30 @@
 <!DOCTYPE html>
-<html lang="pt-br">
-
+<html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <title>Painel Administrativo</title>
-
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-
-    <style>
-        body {
-            background: #f4f6f9;
-        }
-
-        .navbar-brand {
-            font-weight: bold;
-        }
-
-        .card {
-            border: none;
-            border-radius: 10px;
-            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
-            transition: 0.3s;
-        }
-
-        .card:hover {
-            transform: translateY(-5px);
-        }
-
-        .menu-card {
-            text-align: center;
-            padding: 30px;
-        }
-
-        .menu-card a {
-            text-decoration: none;
-        }
-    </style>
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Redirecionando...</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/app.css">
 </head>
-
 <body>
-
-    <!-- MENU SUPERIOR -->
-
-    <nav class="navbar navbar-dark bg-dark">
-        <div class="container-fluid">
-
-            <span class="navbar-brand">⚖ Sistema Jurídico</span>
-
-            <div>
-
-                <span class="text-white me-3">
-                    Usuário: <strong id="usuarioLogado"></strong>
-                </span>
-
-                <button class="btn btn-danger btn-sm" onclick="logout()">Sair</button>
-
-            </div>
-
-        </div>
-    </nav>
-
-    <!-- CONTEÚDO -->
-
-    <div class="container mt-5">
-
-        <h3 class="mb-4">Painel Administrativo</h3>
-
-        <div class="row g-4">
-
-            <!-- CLIENTES -->
-
-            <div class="col-md-4">
-                <div class="card">
-                    <div class="menu-card">
-
-                        <h4>👤 Clientes</h4>
-
-                        <p>Cadastro e gerenciamento de clientes</p>
-
-                        <a href="/clientes.html" class="btn btn-primary">
-                            Abrir
-                        </a>
-
-                    </div>
-                </div>
-            </div>
-
-            <!-- PROCESSOS -->
-
-            <div class="col-md-4">
-                <div class="card">
-                    <div class="menu-card">
-
-                        <h4>⚖ Processos</h4>
-
-                        <p>Controle de processos jurídicos</p>
-
-                        <a href="/processos.html" class="btn btn-primary">
-                            Abrir
-                        </a>
-
-                    </div>
-                </div>
-            </div>
-
-            <!-- LISTAR CLIENTES API -->
-
-            <div class="col-md-4">
-                <div class="card">
-                    <div class="menu-card">
-
-                        <h4>📊 Teste API</h4>
-
-                        <p>Consultar clientes via API</p>
-
-                        <button class="btn btn-success" onclick="carregarClientes()">
-                            Listar Clientes
-                        </button>
-
-                    </div>
-                </div>
-            </div>
-
-        </div>
-
-        <hr class="mt-5">
-
-        <h5>Resultado da API</h5>
-
-        <pre id="resultado" class="bg-dark text-white p-3 rounded"></pre>
-
+  <main class="container py-5">
+    <div class="surface-card p-4">
+      <h1 class="h4 mb-2">Redirecionando</h1>
+      <p class="text-muted mb-0">Carregando o painel correto...</p>
     </div>
+  </main>
 
-    <script>
-
-        const token = localStorage.getItem("token")
-
-        if (!token) {
-            window.location.href = "/login.html"
-        }
-
-        // mostrar usuário logado
-        const payload = JSON.parse(atob(token.split('.')[1]))
-        document.getElementById("usuarioLogado").innerText = payload.nome
-
-        // logout
-        function logout() {
-            localStorage.removeItem("token")
-            window.location.href = "/index.html"
-        }
-
-        // testar API
-        async function carregarClientes() {
-
-            const resposta = await fetch("/clientes", {
-                headers: {
-                    "Authorization": "Bearer " + token
-                }
-            })
-
-            const dados = await resposta.json()
-
-            document.getElementById("resultado").innerText =
-                JSON.stringify(dados, null, 2)
-
-        }
-
-    </script>
-
+  <script src="/app.js"></script>
+  <script>
+    const auth = App.getAuth();
+    if (!auth) {
+      window.location.href = '/login.html';
+    } else if (auth.user.role === 'platform_admin') {
+      window.location.href = '/administracao.html';
+    } else {
+      window.location.href = '/escritorio.html';
+    }
+  </script>
 </body>
-
 </html>

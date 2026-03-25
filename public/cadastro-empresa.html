@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastrar empresa | Sistema Jurídico</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/app.css">
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg app-navbar">
+        <div class="container py-2">
+            <a class="navbar-brand d-flex align-items-center gap-3" href="/">
+                <span class="brand-mark">⚖</span>
+                <span class="fw-semibold">Sistema Jurídico</span>
+            </a>
+            <div class="ms-auto d-flex flex-wrap gap-2 align-items-center">
+                <a class="btn btn-outline-dark btn-sm" href="/login.html">Entrar</a>
+                <a class="btn btn-outline-dark btn-sm" href="/acesso-master.html">Área master</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="page-wrap container py-4 py-lg-5">
+        <div class="row g-4 align-items-stretch">
+            <div class="col-lg-5">
+                <section class="surface-card h-100">
+                    <div class="card-body p-4 p-md-5">
+                        <span class="eyebrow">Pré-cadastro</span>
+                        <h1 class="display-title mt-3">Cadastre o escritório e aguarde a validação.</h1>
+                        <p class="lead-copy mt-3 mb-4">
+                            O envio cria a empresa, o usuário administrador inicial e deixa o escritório aguardando aprovação.
+                        </p>
+                        <div class="action-grid">
+                            <article class="action-card">
+                                <div class="icon">1</div>
+                                <h5 class="h6 fw-bold">Plano</h5>
+                                <p class="mb-0">Selecione o plano desejado antes de concluir.</p>
+                            </article>
+                            <article class="action-card">
+                                <div class="icon">2</div>
+                                <h5 class="h6 fw-bold">Escritório</h5>
+                                <p class="mb-0">Informe os dados institucionais da empresa.</p>
+                            </article>
+                            <article class="action-card">
+                                <div class="icon">3</div>
+                                <h5 class="h6 fw-bold">Administrador</h5>
+                                <p class="mb-0">Crie o acesso inicial da conta.</p>
+                            </article>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <div class="col-lg-7">
+                <section class="surface-card">
+                    <div class="card-body p-4 p-md-5">
+                        <div class="d-flex align-items-center gap-3 mb-4">
+                            <div class="brand-mark">🏢</div>
+                            <div>
+                                <div class="text-uppercase text-muted small fw-semibold">Novo escritório</div>
+                                <h2 class="section-title mb-0">Cadastrar empresa</h2>
+                            </div>
+                        </div>
+
+                        <form id="formEmpresa">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="app-label" for="plano">Plano</label>
+                                    <select id="plano" class="form-select" required>
+                                        <option value="">Carregando planos...</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="app-label" for="nomeEmpresa">Nome da empresa</label>
+                                    <input id="nomeEmpresa" class="form-control" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="app-label" for="cnpj">CNPJ</label>
+                                    <input id="cnpj" class="form-control" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="app-label" for="emailEmpresa">E-mail da empresa</label>
+                                    <input id="emailEmpresa" type="email" class="form-control">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="app-label" for="telefoneEmpresa">Telefone</label>
+                                    <input id="telefoneEmpresa" class="form-control">
+                                </div>
+                                <div class="col-12">
+                                    <div class="soft-divider my-2"></div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="app-label" for="nomeAdmin">Nome do administrador</label>
+                                    <input id="nomeAdmin" class="form-control" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="app-label" for="emailAdmin">E-mail do administrador</label>
+                                    <input id="emailAdmin" type="email" class="form-control" required>
+                                </div>
+                                <div class="col-12">
+                                    <label class="app-label" for="senhaAdmin">Senha do administrador</label>
+                                    <input id="senhaAdmin" type="password" class="form-control" required>
+                                </div>
+                            </div>
+
+                            <div class="d-flex align-items-center gap-3 mt-4 flex-wrap">
+                                <button class="btn btn-primary" type="submit" id="btnSalvar">Criar empresa</button>
+                                <div id="msg" class="small"></div>
+                            </div>
+                        </form>
+
+                        <div class="soft-divider my-4"></div>
+
+                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                            <a class="muted-link" href="/login.html">Já tenho conta</a>
+                            <a class="muted-link" href="/">Voltar ao site</a>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <script src="/app.js"></script>
+    <script>
+        const auth = App.getAuth();
+        if (auth) {
+            window.location.href = auth.user.role === 'platform_admin' ? '/administracao.html' : '/escritorio.html';
+        }
+
+        const form = document.getElementById('formEmpresa');
+        const msg = document.getElementById('msg');
+        const btn = document.getElementById('btnSalvar');
+        const planoSelect = document.getElementById('plano');
+
+        async function carregarPlanos() {
+            try {
+                const response = await fetch('/auth/planos');
+                const planos = await response.json();
+                planoSelect.innerHTML = ['<option value="">Selecione um plano</option>']
+                    .concat(planos.map((plano) => `
+                        <option value="${plano.id}">
+                            ${App.escapeHtml(plano.nome)} - ${App.formatCurrency(plano.preco_mensal)}
+                        </option>
+                    `))
+                    .join('');
+            } catch (error) {
+                planoSelect.innerHTML = '<option value="">Falha ao carregar planos</option>';
+            }
+        }
+
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            msg.textContent = '';
+            btn.disabled = true;
+            btn.textContent = 'Criando...';
+
+            try {
+                const response = await fetch('/auth/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        empresa: {
+                            nome: document.getElementById('nomeEmpresa').value.trim(),
+                            cnpj: document.getElementById('cnpj').value.trim(),
+                            email: document.getElementById('emailEmpresa').value.trim(),
+                            telefone: document.getElementById('telefoneEmpresa').value.trim(),
+                            plano_id: planoSelect.value
+                        },
+                        admin: {
+                            nome: document.getElementById('nomeAdmin').value.trim(),
+                            email: document.getElementById('emailAdmin').value.trim(),
+                            senha: document.getElementById('senhaAdmin').value
+                        }
+                    })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.msg || 'Falha ao criar empresa');
+                }
+
+                msg.textContent = `${data.msg}. Agora você pode entrar no sistema.`;
+                msg.className = 'small text-success';
+                form.reset();
+            } catch (error) {
+                msg.textContent = error.message;
+                msg.className = 'small text-danger';
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Criar empresa';
+            }
+        });
+
+        carregarPlanos();
+    </script>
+</body>
+
+</html>
